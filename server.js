@@ -37,6 +37,10 @@ const UserSchema = new mongoose.Schema({
         modelId: String,
         name: String,
         createdAt: Date
+    }],
+    generatedImages: [{
+        url: String,
+        createdAt: Date
     }]
 });
 
@@ -329,7 +333,7 @@ app.post('/generate', authenticateToken, async (req, res) => {
         );
 
         const modelDetails = modelDetailsResponse.data;
-        console.log('Model details:', modelDetails); // Log the model details for debugging
+        console.log('Model details:', modelDetails);
 
         // Use the latest_version object to get the version ID
         const latestVersionId = modelDetails.latest_version?.id;
@@ -356,6 +360,13 @@ app.post('/generate', authenticateToken, async (req, res) => {
         }
 
         if (result.status === 'succeeded') {
+            // Save the generated image URL to the user's account
+            req.user.generatedImages.push({
+                url: result.output[0], // Assuming the output is an array of URLs
+                createdAt: new Date()
+            });
+            await req.user.save();
+
             res.json({ output: result.output });
         } else {
             throw new Error('Image generation failed');
@@ -363,6 +374,18 @@ app.post('/generate', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Generation error:', error);
         res.status(500).json({ error: 'Failed to generate image', details: error.message });
+    }
+});
+
+// Endpoint to get all generated images
+app.get('/generated-images', authenticateToken, async (req, res) => {
+    try {
+        // Ensure generatedImages is an array
+        const images = req.user.generatedImages || [];
+        res.json({ images });
+    } catch (error) {
+        console.error('Error fetching generated images:', error);
+        res.status(500).json({ error: 'Failed to fetch generated images' });
     }
 });
 
