@@ -371,8 +371,8 @@ function App() {
     };
 
     const handleImageError = (index) => {
-        setGeneratedImages(prevImages => prevImages.filter((_, i) => i !== index));
-        setError('Some images failed to load.');
+        console.error(`Image at index ${index} failed to load.`);
+        setError('Some images failed to load, but they are still listed.');
     };
 
     return (
@@ -625,7 +625,7 @@ function App() {
                                             <img 
                                                 src={image.url} 
                                                 alt={`Generated ${index + 1}`} 
-                                                onError={() => handleImageError(index)} // Handle image load error
+                                                onError={() => handleImageError(index)} // Log error without removing image
                                                 onClick={() => handleImageClick(image.url)} // Open image in overlay
                                                 style={{ cursor: 'pointer' }} // Change cursor to pointer to indicate clickability
                                             />
