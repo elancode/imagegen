@@ -50,8 +50,16 @@ const User = mongoose.model('User', UserSchema);
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
+const allowedOrigins = ['https://greatshots.art', 'https://www.greatshots.art'];
+
 app.use(cors({
-    origin: process.env.REACT_APP_CLIENT_URL,
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(express.json());
