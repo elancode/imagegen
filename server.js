@@ -81,7 +81,7 @@ const authenticateToken = async (req, res, next) => {
 };
 
 // Register endpoint
-app.post('/auth/register', async (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -333,7 +333,7 @@ const baseModelName = 'flux-dev-lora-trainer';
 const baseModelVersionId = 'd995297071a44dcb72244e6c19462111649ec86a9646c32df56daa7f14801944'; // Version ID of the base model
 
 // Update the `/train` endpoint
-app.post('/train', authenticateToken, upload.array('images', 20), async (req, res) => {
+app.post('/api/train', authenticateToken, upload.array('images', 20), async (req, res) => {
     try {
         console.log('Starting training process...');
         const files = req.files;
