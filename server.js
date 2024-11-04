@@ -202,8 +202,8 @@ app.post('/generate', authenticateToken, async (req, res) => {
             input: {
                 prompt: prompt,
                 negative_prompt: "blurry, distorted, low quality, low resolution",
-                num_inference_steps: 50,
-                guidance_scale: 7.5,
+                num_inference_steps: 28,
+                guidance_scale: 3.5,
             }
         });
 
