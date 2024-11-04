@@ -114,7 +114,7 @@ app.post('/auth/register', async (req, res) => {
 });
 
 // Login endpoint
-app.post('/auth/login', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
