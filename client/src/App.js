@@ -168,7 +168,7 @@ function App() {
         });
 
         try {
-            const response = await fetch('http://localhost:5001/train', {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/train`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -194,7 +194,7 @@ function App() {
 
     const pollTrainingStatus = async (modelId) => {
         try {
-            const response = await fetch(`http://localhost:5001/training-status/${modelId}`, {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/training-status/${modelId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -247,7 +247,7 @@ function App() {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:5001/generate', {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -303,7 +303,7 @@ function App() {
         setAuthError('');
         
         try {
-            const response = await fetch(`http://localhost:5001/auth/${isLogin ? 'login' : 'register'}`, {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/auth/${isLogin ? 'login' : 'register'}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
