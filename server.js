@@ -50,17 +50,10 @@ const User = mongoose.model('User', UserSchema);
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-const allowedOrigins = ['https://greatshots.art', 'https://www.greatshots.art'];
-
+// Allow all origins
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
+    origin: '*', // This allows all origins
+    credentials: true // If you need to include credentials like cookies, set this to true
 }));
 app.use(express.json());
 
