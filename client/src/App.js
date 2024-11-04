@@ -373,7 +373,7 @@ function App() {
 
     const handleImageError = (index) => {
         console.error(`Image at index ${index} failed to load.`);
-        //setError('Some images failed to load, but they are still listed.');
+        // Optionally, you can set an error state or remove the image from the list
     };
 
     return (

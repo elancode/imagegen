@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 const Replicate = require('replicate');
 const archiver = require('archiver');
 const FormData = require('form-data');
+const { Storage } = require('@google-cloud/storage');
 
 dotenv.config();
 
@@ -216,17 +217,30 @@ app.post('/api/generate', authenticateToken, async (req, res) => {
         }
 
         if (result.status === 'succeeded') {
-            const imageUrl = result.output[0]; // Assuming the output is an array of URLs
-            console.log('Generated image URL:', imageUrl); // Log the URL for verification
+            const imageUrl = result.output[0];
+            const gcsDestination = `generated-images/${req.user._id}/${new Date().toISOString()}.png`;
 
-            // Save the generated image URL to the user's account
+            // Download the image and upload to GCS
+            const response = await axios.get(imageUrl, { responseType: 'stream' });
+            const localPath = path.join(__dirname, 'temp', 'generated.png');
+            const writer = fs.createWriteStream(localPath);
+            response.data.pipe(writer);
+            await new Promise((resolve, reject) => {
+                writer.on('finish', resolve);
+                writer.on('error', reject);
+            });
+
+            await uploadToGCS(localPath, gcsDestination);
+            fs.unlinkSync(localPath); // Clean up local file
+
+            const gcsUrl = `https://storage.googleapis.com/${bucketName}/${gcsDestination}`;
             req.user.generatedImages.push({
-                url: imageUrl,
+                url: gcsUrl,
                 createdAt: new Date()
             });
             await req.user.save();
 
-            res.json({ output: result.output });
+            res.json({ output: [gcsUrl] });
         } else {
             throw new Error('Image generation failed');
         }
@@ -443,4 +457,18 @@ app.post('/api/train', authenticateToken, upload.array('images', 20), async (req
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
-}); 
+});
+
+const storage = new Storage();
+const bucketName = process.env.GCS_BUCKET_NAME;
+
+async function uploadToGCS(filePath, destination) {
+    await storage.bucket(bucketName).upload(filePath, {
+        destination,
+        gzip: true,
+        metadata: {
+            cacheControl: 'public, max-age=31536000',
+        },
+    });
+    console.log(`${filePath} uploaded to ${bucketName}/${destination}`);
+} 
