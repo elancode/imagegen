@@ -620,15 +620,20 @@ function App() {
                                 <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                                     Click to see full size image
                                 </Typography>
-                                <ImageList cols={3} rowHeight={164}>
+                                <ImageList cols={3} gap={8} rowHeight={164}>
                                     {generatedImages.slice().reverse().map((image, index) => (
                                         <ImageListItem key={index}>
                                             <img 
                                                 src={image.url} 
                                                 alt={`Generated ${index + 1}`} 
-                                                onError={() => handleImageError(index)} // Log error without removing image
-                                                onClick={() => handleImageClick(image)} // Open image in overlay
-                                                style={{ cursor: 'pointer' }} // Change cursor to pointer to indicate clickability
+                                                onError={() => handleImageError(index)} 
+                                                onClick={() => handleImageClick(image)} 
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover', // Ensures the image covers the square
+                                                    aspectRatio: '1 / 1' // Maintains a square aspect ratio
+                                                }}
                                             />
                                         </ImageListItem>
                                     ))}
@@ -649,7 +654,7 @@ function App() {
                                             src={selectedImage.url} 
                                             alt="Full-size" 
                                             style={{ maxWidth: '100%', maxHeight: '80vh' }} 
-                                            onClick={handleOverlayClose} // Close overlay on click
+                                            onClick={handleOverlayClose} 
                                         />
                                         <Typography variant="body2" sx={{ mt: 2 }}>
                                             {selectedImage.prompt}
