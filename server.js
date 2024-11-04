@@ -43,7 +43,8 @@ const UserSchema = new mongoose.Schema({
     }],
     generatedImages: [{
         url: String,
-        createdAt: Date
+        createdAt: Date,
+        prompt: String
     }]
 });
 
@@ -246,7 +247,8 @@ app.post('/api/generate', authenticateToken, async (req, res) => {
             const gcsUrl = `https://storage.googleapis.com/${bucketName}/${gcsDestination}`;
             req.user.generatedImages.push({
                 url: gcsUrl,
-                createdAt: new Date()
+                createdAt: new Date(),
+                prompt
             });
             await req.user.save();
 

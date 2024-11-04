@@ -258,7 +258,6 @@ function App() {
                 },
                 body: JSON.stringify({
                     modelId: selectedModelId,
-                    //prompt: `${triggerWord} ${prompt}`,
                     prompt: `${prompt}`,
                 }),
             });
@@ -270,7 +269,7 @@ function App() {
 
             const data = await response.json();
             if (data.output && data.output[0]) {
-                setGeneratedImages(prevImages => [...prevImages, { url: data.output[0], createdAt: new Date() }]);
+                setGeneratedImages(prevImages => [...prevImages, { url: data.output[0], prompt, createdAt: new Date() }]);
             } else {
                 setError('No output received from the server.');
             }
@@ -362,8 +361,8 @@ function App() {
         setShowAuth(true);
     };
 
-    const handleImageClick = (imageUrl) => {
-        setSelectedImage(imageUrl);
+    const handleImageClick = (image) => {
+        setSelectedImage(image);
         setOverlayOpen(true);
     };
 
@@ -628,7 +627,7 @@ function App() {
                                                 src={image.url} 
                                                 alt={`Generated ${index + 1}`} 
                                                 onError={() => handleImageError(index)} // Log error without removing image
-                                                onClick={() => handleImageClick(image.url)} // Open image in overlay
+                                                onClick={() => handleImageClick(image)} // Open image in overlay
                                                 style={{ cursor: 'pointer' }} // Change cursor to pointer to indicate clickability
                                             />
                                         </ImageListItem>
@@ -645,12 +644,17 @@ function App() {
                         <Dialog open={overlayOpen} onClose={handleOverlayClose} maxWidth="lg">
                             <DialogContent sx={{ textAlign: 'center' }}>
                                 {selectedImage && (
-                                    <img 
-                                        src={selectedImage} 
-                                        alt="Full-size" 
-                                        style={{ maxWidth: '100%', maxHeight: '80vh' }} 
-                                        onClick={handleOverlayClose} // Close overlay on click
-                                    />
+                                    <>
+                                        <img 
+                                            src={selectedImage.url} 
+                                            alt="Full-size" 
+                                            style={{ maxWidth: '100%', maxHeight: '80vh' }} 
+                                            onClick={handleOverlayClose} // Close overlay on click
+                                        />
+                                        <Typography variant="body2" sx={{ mt: 2 }}>
+                                            {selectedImage.prompt}
+                                        </Typography>
+                                    </>
                                 )}
                             </DialogContent>
                         </Dialog>
