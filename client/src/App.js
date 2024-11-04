@@ -49,7 +49,7 @@ function App() {
     const maxRetries = 3; // Set a maximum number of retries
 
     // Define your trigger word used during training
-    const triggerWord = 'your_unique_trigger_word'; // Replace with your actual trigger word
+    const triggerWord = 'USER'; // Replace with your actual trigger word
 
     useEffect(() => {
         console.log('Server URL:', process.env.REACT_APP_SERVER_URL);
@@ -258,7 +258,8 @@ function App() {
                 },
                 body: JSON.stringify({
                     modelId: selectedModelId,
-                    prompt: `${triggerWord} ${prompt}`,
+                    //prompt: `${triggerWord} ${prompt}`,
+                    prompt: `${prompt}`,
                 }),
             });
 
