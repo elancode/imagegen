@@ -266,7 +266,7 @@ function App() {
 
             const data = await response.json();
             if (data.output && data.output[0]) {
-                setGeneratedImages(prevImages => [...prevImages, { url: data.output[0], createdAt: new Date() }]);
+                setGeneratedImages(prevImages => [{ url: data.output[0], createdAt: new Date() }, ...prevImages]);
             } else {
                 setError('No output received from the server.');
             }
@@ -613,7 +613,7 @@ function App() {
                                     Click to see full size image
                                 </Typography>
                                 <ImageList cols={3} rowHeight={164}>
-                                    {generatedImages.map((image, index) => (
+                                    {generatedImages.slice().reverse().map((image, index) => (
                                         <ImageListItem key={index}>
                                             <img 
                                                 src={image.url} 
