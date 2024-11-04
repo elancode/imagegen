@@ -70,7 +70,7 @@ function App() {
 
     const fetchUserModels = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/models`, {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/models`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -99,7 +99,7 @@ function App() {
 
     const fetchGeneratedImages = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/generated-images`, {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/generated-images`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
