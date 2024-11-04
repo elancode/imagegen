@@ -58,8 +58,8 @@ function App() {
             Notification.requestPermission();
         }
 
-        // Fetch user models and generated images if token is present
-        if (token) {
+        // Fetch user models and generated images if token is present and not loading
+        if (token && !loading) {
             fetchUserModels();
             fetchGeneratedImages();
         }
@@ -68,7 +68,7 @@ function App() {
         if (modelId && trainStatus === 'training') {
             pollTrainingStatus(modelId);
         }
-    }, [token]);
+    }, [token, loading]);
 
     const fetchUserModels = async () => {
         try {
@@ -224,24 +224,14 @@ function App() {
                 }
 
                 setError(null);
-                setRetryCount(0); // Reset retry count on success
             } else if (data.status === 'failed') {
                 updateTrainStatus('failed');
                 setLoading(false);
                 setError('Training failed');
                 setTrainingProgress('Training failed. Please try again.');
-                setRetryCount(0); // Reset retry count on failure
             } else {
-                // Continue polling if retry count is below maxRetries
-                if (retryCount < maxRetries) {
-                    setTimeout(() => {
-                        setRetryCount(prev => prev + 1);
-                        pollTrainingStatus(modelId);
-                    }, 30000);
-                } else {
-                    setError('Max retries reached. Please try again later.');
-                    setLoading(false);
-                }
+                // No retry logic, simply log the current status
+                console.log('Current training status:', data.status);
             }
         } catch (error) {
             console.error('Error:', error);
