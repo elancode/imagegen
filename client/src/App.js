@@ -45,6 +45,8 @@ function App() {
     const [latestLogLine, setLatestLogLine] = useState('');
     const [overlayOpen, setOverlayOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [retryCount, setRetryCount] = useState(0);
+    const maxRetries = 3; // Set a maximum number of retries
 
     // Define your trigger word used during training
     const triggerWord = 'your_unique_trigger_word'; // Replace with your actual trigger word
@@ -222,14 +224,24 @@ function App() {
                 }
 
                 setError(null);
+                setRetryCount(0); // Reset retry count on success
             } else if (data.status === 'failed') {
                 updateTrainStatus('failed');
                 setLoading(false);
                 setError('Training failed');
                 setTrainingProgress('Training failed. Please try again.');
+                setRetryCount(0); // Reset retry count on failure
             } else {
-                // Continue polling
-                setTimeout(() => pollTrainingStatus(modelId), 30000);
+                // Continue polling if retry count is below maxRetries
+                if (retryCount < maxRetries) {
+                    setTimeout(() => {
+                        setRetryCount(prev => prev + 1);
+                        pollTrainingStatus(modelId);
+                    }, 30000);
+                } else {
+                    setError('Max retries reached. Please try again later.');
+                    setLoading(false);
+                }
             }
         } catch (error) {
             console.error('Error:', error);
