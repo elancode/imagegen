@@ -266,7 +266,7 @@ function App() {
 
             const data = await response.json();
             if (data.output && data.output[0]) {
-                setGeneratedImages(prevImages => [{ url: data.output[0], createdAt: new Date() }, ...prevImages]);
+                setGeneratedImages(prevImages => [...prevImages, { url: data.output[0], createdAt: new Date() }]);
             } else {
                 setError('No output received from the server.');
             }
