@@ -50,6 +50,7 @@ function App() {
     const triggerWord = 'your_unique_trigger_word'; // Replace with your actual trigger word
 
     useEffect(() => {
+        console.log('Server URL:', process.env.REACT_APP_SERVER_URL);
         // Request notification permission on app load
         if ("Notification" in window) {
             Notification.requestPermission();
@@ -69,7 +70,7 @@ function App() {
 
     const fetchUserModels = async () => {
         try {
-            const response = await fetch('http://localhost:5001/models', {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/models`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
@@ -98,7 +99,7 @@ function App() {
 
     const fetchGeneratedImages = async () => {
         try {
-            const response = await fetch('http://localhost:5001/generated-images', {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/generated-images`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }

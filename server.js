@@ -50,7 +50,10 @@ const User = mongoose.model('User', UserSchema);
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.REACT_APP_CLIENT_URL,
+    credentials: true
+}));
 app.use(express.json());
 
 // Authentication middleware
@@ -151,7 +154,6 @@ app.post('/auth/login', async (req, res) => {
 // Get user's models
 app.get('/models', authenticateToken, async (req, res) => {
     try {
-        // Return all models, not just trained ones
         res.json({ models: req.user.models });
     } catch (error) {
         console.error('Error fetching models:', error);
@@ -273,7 +275,6 @@ app.get('/training-status/:trainingId', authenticateToken, async (req, res) => {
 // Endpoint to get all generated images
 app.get('/generated-images', authenticateToken, async (req, res) => {
     try {
-        // Ensure generatedImages is an array
         const images = req.user.generatedImages || [];
         res.json({ images });
     } catch (error) {
@@ -439,6 +440,6 @@ app.post('/train', authenticateToken, upload.array('images', 20), async (req, re
 });
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 }); 
