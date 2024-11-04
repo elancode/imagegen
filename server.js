@@ -13,6 +13,7 @@ const archiver = require('archiver');
 const FormData = require('form-data');
 const { Storage } = require('@google-cloud/storage');
 const { v4: uuidv4 } = require('uuid');
+const sharp = require('sharp');
 
 dotenv.config();
 
@@ -233,13 +234,16 @@ app.post('/api/generate', authenticateToken, async (req, res) => {
             const localPath = path.join(tempDir, uniqueFilename);
 
             // Download the image and upload to GCS
-            const response = await axios.get(imageUrl, { responseType: 'stream' });
-            const writer = fs.createWriteStream(localPath);
-            response.data.pipe(writer);
-            await new Promise((resolve, reject) => {
-                writer.on('finish', resolve);
-                writer.on('error', reject);
-            });
+            const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+            const buffer = Buffer.from(response.data, 'binary');
+
+            // Convert the image to a different format, e.g., PNG
+            const convertedBuffer = await sharp(buffer)
+                .toFormat('png') // Change 'png' to your desired format
+                .toBuffer();
+
+            // Save the converted image to a temporary file
+            fs.writeFileSync(localPath, convertedBuffer);
 
             await uploadToGCS(localPath, gcsDestination);
             fs.unlinkSync(localPath); // Clean up local file

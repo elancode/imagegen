@@ -231,8 +231,8 @@ function App() {
                 setError('Training failed');
                 setTrainingProgress('Training failed. Please try again.');
             } else {
-                // No retry logic, simply log the current status
-                console.log('Current training status:', data.status);
+                // Continue polling if training is still in progress
+                setTimeout(() => pollTrainingStatus(modelId), 5000); // Poll every 5 seconds
             }
         } catch (error) {
             console.error('Error:', error);
@@ -242,6 +242,12 @@ function App() {
             setTrainingProgress('Failed to check training status');
         }
     };
+
+    useEffect(() => {
+        if (modelId && trainStatus === 'training') {
+            pollTrainingStatus(modelId);
+        }
+    }, [modelId, trainStatus]);
 
     const handleGenerate = async () => {
         if (!selectedModelId || !prompt) return;
