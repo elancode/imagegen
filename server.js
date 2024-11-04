@@ -170,7 +170,7 @@ app.get('/api/models', authenticateToken, async (req, res) => {
 });
 
 // Endpoint to generate images with trained model
-app.post('/generate', authenticateToken, async (req, res) => {
+app.post('/api/generate', authenticateToken, async (req, res) => {
     try {
         const { modelId, prompt } = req.body;
 
@@ -244,7 +244,7 @@ app.post('/generate', authenticateToken, async (req, res) => {
 });
 
 // Endpoint to check training status
-app.get('/training-status/:trainingId', authenticateToken, async (req, res) => {
+app.get('/api/training-status/:trainingId', authenticateToken, async (req, res) => {
     try {
         const training = await replicate.trainings.get(req.params.trainingId);
 
