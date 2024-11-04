@@ -101,9 +101,10 @@ function App() {
 
     const fetchGeneratedImages = async () => {
         try {
+            console.log('Token:', token); // Log the token for debugging
             const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/generated-images`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${token}`, // Ensure token is correctly set
                 }
             });
 
@@ -372,7 +373,7 @@ function App() {
 
     const handleImageError = (index) => {
         console.error(`Image at index ${index} failed to load.`);
-        setError('Some images failed to load, but they are still listed.');
+        //setError('Some images failed to load, but they are still listed.');
     };
 
     return (
