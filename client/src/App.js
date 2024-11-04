@@ -370,6 +370,11 @@ function App() {
         setSelectedImage(null);
     };
 
+    const handleImageError = (index) => {
+        setGeneratedImages(prevImages => prevImages.filter((_, i) => i !== index));
+        setError('Some images failed to load.');
+    };
+
     return (
         <Container maxWidth="md">
             <Box sx={{ my: 4 }}>
@@ -620,7 +625,7 @@ function App() {
                                             <img 
                                                 src={image.url} 
                                                 alt={`Generated ${index + 1}`} 
-                                                onError={(e) => e.target.src = '/path/to/placeholder.png'} // Fallback to a placeholder image
+                                                onError={() => handleImageError(index)} // Handle image load error
                                                 onClick={() => handleImageClick(image.url)} // Open image in overlay
                                                 style={{ cursor: 'pointer' }} // Change cursor to pointer to indicate clickability
                                             />
