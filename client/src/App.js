@@ -620,9 +620,9 @@ function App() {
                                 <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                                     Click to see full size image
                                 </Typography>
-                                <ImageList cols={3} gap={8} rowHeight={164}>
+                                <ImageList cols={3} gap={8}>
                                     {generatedImages.slice().reverse().map((image, index) => (
-                                        <ImageListItem key={index}>
+                                        <ImageListItem key={index} style={{ width: '150px', height: '150px' }}>
                                             <img 
                                                 src={image.url} 
                                                 alt={`Generated ${index + 1}`} 
@@ -632,7 +632,6 @@ function App() {
                                                     width: '100%',
                                                     height: '100%',
                                                     objectFit: 'cover', // Ensures the image covers the square
-                                                    aspectRatio: '1 / 1' // Maintains a square aspect ratio
                                                 }}
                                             />
                                         </ImageListItem>
