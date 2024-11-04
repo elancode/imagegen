@@ -160,7 +160,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Get user's models
-app.get('/models', authenticateToken, async (req, res) => {
+app.get('/api/models', authenticateToken, async (req, res) => {
     try {
         res.json({ models: req.user.models });
     } catch (error) {
@@ -281,7 +281,7 @@ app.get('/training-status/:trainingId', authenticateToken, async (req, res) => {
 });
 
 // Endpoint to get all generated images
-app.get('/generated-images', authenticateToken, async (req, res) => {
+app.get('/api/generated-images', authenticateToken, async (req, res) => {
     try {
         const images = req.user.generatedImages || [];
         res.json({ images });
