@@ -12,6 +12,7 @@ const Replicate = require('replicate');
 const archiver = require('archiver');
 const FormData = require('form-data');
 const { Storage } = require('@google-cloud/storage');
+const { v4: uuidv4 } = require('uuid');
 
 dotenv.config();
 
@@ -220,9 +221,18 @@ app.post('/api/generate', authenticateToken, async (req, res) => {
             const imageUrl = result.output[0];
             const gcsDestination = `generated-images/${req.user._id}/${new Date().toISOString()}.png`;
 
+            // Ensure the temp directory exists
+            const tempDir = path.join(__dirname, 'temp');
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir, { recursive: true });
+            }
+
+            // Generate a unique filename for the temporary file
+            const uniqueFilename = `${uuidv4()}.png`;
+            const localPath = path.join(tempDir, uniqueFilename);
+
             // Download the image and upload to GCS
             const response = await axios.get(imageUrl, { responseType: 'stream' });
-            const localPath = path.join(__dirname, 'temp', 'generated.png');
             const writer = fs.createWriteStream(localPath);
             response.data.pipe(writer);
             await new Promise((resolve, reject) => {
