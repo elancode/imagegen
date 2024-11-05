@@ -61,6 +61,7 @@ function App() {
     const [selectedImage, setSelectedImage] = useState(null);
     const [retryCount, setRetryCount] = useState(0);
     const maxRetries = 3; // Set a maximum number of retries
+    const [imageGeneratedNotification, setImageGeneratedNotification] = useState(false);
 
     // Define your trigger word used during training
     const triggerWord = 'USER'; // Replace with your actual trigger word
@@ -291,6 +292,7 @@ function App() {
             if (data.output && data.output[0]) {
                 const modelName = userModels.find(model => model.modelId === selectedModelId)?.name || 'Unknown Model';
                 setGeneratedImages(prevImages => [...prevImages, { url: data.output[0], prompt, modelName, createdAt: new Date() }]);
+                setImageGeneratedNotification(true); // Show notification
             } else {
                 setError('No output received from the server.');
             }
@@ -300,6 +302,10 @@ function App() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleUserAction = () => {
+        setImageGeneratedNotification(false); // Hide notification on any user action
     };
 
     const handleReset = () => {
@@ -397,8 +403,18 @@ function App() {
         // Optionally, you can set an error state or remove the image from the list
     };
 
+    useEffect(() => {
+        // Automatically select the model if there's only one with status 'succeeded'
+        const succeededModels = userModels.filter(model => model.status === 'succeeded');
+        if (succeededModels.length === 1) {
+            setSelectedModelId(succeededModels[0].modelId);
+        } else {
+            setSelectedModelId(null); // Clear selection if conditions are not met
+        }
+    }, [userModels]);
+
     return (
-        <Container maxWidth="md">
+        <Container maxWidth="md" onClick={handleUserAction}>
             <Box sx={{ my: 4 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', mb: 3 }}>
                     {/* Logo */}
@@ -467,61 +483,90 @@ function App() {
 
             {token && (
                 <>
-                    {showModelInput && (
+                    {generatedImages.length > 0 && (
                         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h6" gutterBottom>
-                                Load Existing Model
+                                Your Generated Images
                             </Typography>
-                            <Box sx={{ display: 'flex', gap: 2 }}>
-                                <TextField
-                                    fullWidth
-                                    label="Enter Model ID"
-                                    value={modelInputValue}
-                                    onChange={(e) => setModelInputValue(e.target.value)}
-                                />
-                                <Button 
-                                    variant="contained"
-                                    onClick={handleLoadModel}
-                                    disabled={!modelInputValue}
-                                >
-                                    Load
-                                </Button>
-                                <Button 
-                                    variant="outlined"
-                                    onClick={() => {
-                                        setShowModelInput(false);
-                                        setModelInputValue('');
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                            </Box>
-                            <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                                Note: You can find your Model ID in the URL of your training session or in the training completion message.
+                            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                Click to see full size image
                             </Typography>
+                            <ImageList cols={getImageListCols()} gap={8}>
+                                {generatedImages.slice().reverse().map((image, index) => (
+                                    <ImageListItem key={index} style={{ width: '150px', height: '150px' }}>
+                                        <img 
+                                            src={image.url} 
+                                            alt={`Generated ${index + 1}`} 
+                                            onError={() => handleImageError(index)} 
+                                            onClick={() => handleImageClick(image)} 
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover', // Ensures the image covers the square
+                                            }}
+                                        />
+                                    </ImageListItem>
+                                ))}
+                            </ImageList>
                         </Paper>
                     )}
 
-                    {trainStatus === 'completed' && (
-                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+                    {userModels.length > 0 && (
+                        <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
                             <Typography variant="h6" gutterBottom>
-                                Your Model ID
+                                Generate Images
                             </Typography>
+                            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                Remember to include the hotword "USER" in your prompt, e.g. USER as a king
+                            </Typography>
+                            {imageGeneratedNotification && (
+                                <Alert severity="success" sx={{ mb: 2 }}>
+                                    New image successfully generated.
+                                </Alert>
+                            )}
                             <TextField
                                 fullWidth
-                                value={modelId}
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                helperText="Save this ID to use your model later or on another device"
+                                label="Enter prompt"
+                                value={prompt}
+                                onChange={(e) => setPrompt(e.target.value)}
+                                margin="normal"
                             />
+                            <Button
+                                variant="contained"
+                                onClick={handleGenerate}
+                                disabled={loading || !prompt || !selectedModelId}
+                                fullWidth
+                                sx={{ mt: 2 }}
+                            >
+                                {loading ? <CircularProgress size={24} /> : 'Generate Image'}
+                            </Button>
                         </Paper>
                     )}
 
-                    {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+                    {userModels.length > 0 && (
+                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+                            <Typography variant="h6" gutterBottom>
+                                Your Models
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                Select a model to generate images
+                            </Typography>
+                            <ul>
+                                {userModels.map((model, index) => (
+                                    <li key={index}>
+                                        <Button
+                                            variant={selectedModelId === model.modelId ? 'contained' : 'outlined'}
+                                            onClick={() => setSelectedModelId(model.modelId)}
+                                            disabled={model.status !== 'succeeded'} // Disable if not succeeded
+                                        >
+                                            {model.name} - {model.status} - Created on {new Date(model.createdAt).toLocaleDateString()}
+                                        </Button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </Paper>
                     )}
-                    
+
                     <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
                         <Typography variant="h6" gutterBottom>
                             Train a Model
@@ -591,89 +636,59 @@ function App() {
                         </Paper>
                     )}
 
-                    {userModels.length > 0 && (
+                    {showModelInput && (
                         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h6" gutterBottom>
-                                Your Models
+                                Load Existing Model
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                                Select a model to generate images
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                <TextField
+                                    fullWidth
+                                    label="Enter Model ID"
+                                    value={modelInputValue}
+                                    onChange={(e) => setModelInputValue(e.target.value)}
+                                />
+                                <Button 
+                                    variant="contained"
+                                    onClick={handleLoadModel}
+                                    disabled={!modelInputValue}
+                                >
+                                    Load
+                                </Button>
+                                <Button 
+                                    variant="outlined"
+                                    onClick={() => {
+                                        setShowModelInput(false);
+                                        setModelInputValue('');
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </Box>
+                            <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+                                Note: You can find your Model ID in the URL of your training session or in the training completion message.
                             </Typography>
-                            <ul>
-                                {userModels.map((model, index) => (
-                                    <li key={index}>
-                                        <Button
-                                            variant={selectedModelId === model.modelId ? 'contained' : 'outlined'}
-                                            onClick={() => setSelectedModelId(model.modelId)}
-                                            disabled={model.status !== 'succeeded'} // Disable if not succeeded
-                                        >
-                                            {model.name} - {model.status} - Created on {new Date(model.createdAt).toLocaleDateString()}
-                                        </Button>
-                                    </li>
-                                ))}
-                            </ul>
                         </Paper>
                     )}
 
-                    {selectedModelId && (
-                        <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
+                    {trainStatus === 'completed' && (
+                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h6" gutterBottom>
-                                Generate Images
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                                Remember to include the hotword "USER" in your prompt, e.g. USER as a king
+                                Your Model ID
                             </Typography>
                             <TextField
                                 fullWidth
-                                label="Enter prompt"
-                                value={prompt}
-                                onChange={(e) => setPrompt(e.target.value)}
-                                margin="normal"
+                                value={modelId}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
+                                helperText="Save this ID to use your model later or on another device"
                             />
-                            <Button
-                                variant="contained"
-                                onClick={handleGenerate}
-                                disabled={loading || !prompt}
-                                fullWidth
-                                sx={{ mt: 2 }}
-                            >
-                                {loading ? <CircularProgress size={24} /> : 'Generate Image'}
-                            </Button>
                         </Paper>
                     )}
 
-                    {generatedImages.length > 0 ? (
-                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Your Generated Images
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                                Click to see full size image
-                            </Typography>
-                            <ImageList cols={getImageListCols()} gap={8}>
-                                {generatedImages.slice().reverse().map((image, index) => (
-                                    <ImageListItem key={index} style={{ width: '150px', height: '150px' }}>
-                                        <img 
-                                            src={image.url} 
-                                            alt={`Generated ${index + 1}`} 
-                                            onError={() => handleImageError(index)} 
-                                            onClick={() => handleImageClick(image)} 
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover', // Ensures the image covers the square
-                                            }}
-                                        />
-                                    </ImageListItem>
-                                ))}
-                            </ImageList>
-                        </Paper>
-                    ) : (
-                        userModels.length > 0 && (
-                            <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-                                No generated images found.
-                            </Typography>
-                        )
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
                     )}
 
                     {/* Image Overlay */}
