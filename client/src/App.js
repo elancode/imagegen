@@ -523,6 +523,12 @@ function App() {
                     )}
                     
                     <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+                        <Typography variant="h6" gutterBottom>
+                            Train a Model
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                            Train a model with images of you from different directions. 7-12 images will work well.
+                        </Typography>
                         <input
                             accept="image/*"
                             type="file"
@@ -663,9 +669,11 @@ function App() {
                             </ImageList>
                         </Paper>
                     ) : (
-                        <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-                            No generated images found.
-                        </Typography>
+                        userModels.length > 0 && (
+                            <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                                No generated images found.
+                            </Typography>
+                        )
                     )}
 
                     {/* Image Overlay */}
