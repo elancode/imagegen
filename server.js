@@ -45,7 +45,8 @@ const UserSchema = new mongoose.Schema({
     generatedImages: [{
         url: String,
         createdAt: Date,
-        prompt: String
+        prompt: String,
+        modelName: String
     }]
 });
 
@@ -127,29 +128,11 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ error: 'Invalid password' });
         }
 
-        // Fetch the latest status for each model from Replicate
-        for (let model of user.models) {
-            try {
-                const training = await replicate.trainings.get(model.modelId);
-                model.status = training.status; // Update the model's status
-            } catch (error) {
-                console.error(`Failed to fetch status for model ${model.modelId}:`, error.message);
-            }
-        }
-        await user.save();
-
-        // Automatically select the model if there's only one with status 'succeeded'
-        const succeededModels = user.models.filter(model => model.status === 'succeeded');
-        let autoSelectedModel = null;
-        if (succeededModels.length === 1) {
-            autoSelectedModel = succeededModels[0];
-        }
-
         // Create token
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
 
-        // Include user's models with updated statuses and the auto-selected model in the response
-        res.json({ token, email: user.email, models: user.models, autoSelectedModel });
+        // Include user's models with updated statuses
+        res.json({ token, email: user.email, models: user.models });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
@@ -252,7 +235,8 @@ app.post('/api/generate', authenticateToken, async (req, res) => {
             req.user.generatedImages.push({
                 url: gcsUrl,
                 createdAt: new Date(),
-                prompt
+                prompt,
+                modelName: model.name
             });
             await req.user.save();
 
