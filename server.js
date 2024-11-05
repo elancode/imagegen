@@ -471,7 +471,7 @@ app.post('/api/train', authenticateToken, upload.array('images', 20), async (req
 });
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, '::', () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
 
