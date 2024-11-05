@@ -1,7 +1,6 @@
 /* Import Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-/* Apply the font to the body and headings */
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
@@ -9,6 +8,11 @@ body {
     line-height: 1.6;
     color: #333; /* Dark grey color */
     font-size: 14px; /* Reduced font size */
+}
+
+#tos-container,
+#privacy-container {
+    padding-left: 20px; /* Add left padding */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -20,9 +24,4 @@ h1, h2, h3, h4, h5, h6 {
 p, ul, li {
     font-size: 14px; /* Reduced font size */
     color: #333; /* Dark grey color */
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+} 

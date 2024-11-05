@@ -469,6 +469,11 @@ function App() {
                             margin="normal"
                             required
                         />
+                        {!isLogin && (
+                            <Typography variant="body2" sx={{ mt: 2 }}>
+                                By registering, you agree to our <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>.
+                            </Typography>
+                        )}
                     </DialogContent>
                     <DialogActions sx={{ px: 3, pb: 2 }}>
                         <Button onClick={() => setIsLogin(!isLogin)}>
@@ -481,6 +486,7 @@ function App() {
                 </form>
             </Dialog>
 
+            {/* Main Content */}
             {token && (
                 <>
                     {generatedImages.length > 0 && (
@@ -714,6 +720,14 @@ function App() {
                     </Dialog>
                 </>
             )}
+
+            {/* Footer with Terms of Service and Privacy Policy links */}
+            <Box sx={{ mt: 4, textAlign: 'center', pb: 4 }}>
+                <Typography variant="body2">
+                    <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a> | 
+                    <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer" style={{ marginLeft: '8px' }}>Privacy Policy</a>
+                </Typography>
+            </Box>
         </Container>
     );
 }
