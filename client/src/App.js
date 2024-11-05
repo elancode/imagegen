@@ -385,25 +385,26 @@ function App() {
     return (
         <Container maxWidth="md">
             <Box sx={{ my: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Box sx={{ mb: 3 }}>
                     <Typography variant="h4" component="h1">
                         GreatShots.art
                     </Typography>
-                    {token && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Typography variant="body2">
-                                {userEmail}
-                            </Typography>
-                            <Button 
-                                variant="outlined" 
-                                color="secondary" 
-                                onClick={handleLogout}
-                            >
-                                Logout
-                            </Button>
-                        </Box>
-                    )}
                 </Box>
+
+                {token && (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Typography variant="body2">
+                            {userEmail}
+                        </Typography>
+                        <Button 
+                            variant="outlined" 
+                            color="secondary" 
+                            onClick={handleLogout}
+                        >
+                            Logout
+                        </Button>
+                    </Box>
+                )}
 
                 {/* Auth Dialog */}
                 <Dialog open={showAuth} maxWidth="xs" fullWidth>
