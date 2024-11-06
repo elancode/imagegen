@@ -437,7 +437,7 @@ function App() {
 
     return (
         <Container maxWidth="md" onClick={handleUserAction}>
-            <Box sx={{ my: 4 }}>
+            <Box sx={{ my: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         {/* Logo */}
@@ -449,7 +449,6 @@ function App() {
                         edge="end"
                         color="inherit"
                         onClick={handleAccountClick}
-                        
                     >
                         <AccountCircle sx={{ fontSize: '2.5rem' }} />
                     </IconButton>
