@@ -24,17 +24,17 @@
             padding-left: 10px;
         }
         .logo {
-            max-width: 60px;
+            max-width: 30px;
             vertical-align: middle;
-            margin-right: 10px; /* Space between logo and name */
+            margin-right: 10px;
         }
 
         .text-logo {
-            height: 30px; /* Ensures same height as logo */
+            height: 15px;
             width: auto;
             vertical-align: middle;
-            object-fit: contain; /* Keeps logo aspect ratio within specified width */
-}
+            object-fit: contain;
+        }
 
         .login-button {
             background-color: #03192f;
@@ -47,7 +47,6 @@
         }
         .image-grid {
             display: grid;
-            //grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             grid-template-columns: 1fr;
             gap: 0px;
             width: 100%;
@@ -77,15 +76,11 @@
         <div class="header">
             <img src="greatshotslogo.png" alt="Company Logo" class="logo">
             <img src="greatshotstextlogo.png" alt="Company Logo" class="text-logo">
-
-            
-            
         </div>
         
         <button class="login-button" onclick="openApp()">Login / Register</button>
         <div class="image-grid">
             <!-- Example images, replace with actual image paths -->
-            
             <img src="img/8.png" alt="Example Image 4">
             <img src="img/14.webp" alt="Example Image 10">
             <img src="img/10.webp" alt="Example Image 6">
@@ -93,10 +88,6 @@
             <img src="img/6.webp" alt="Example Image 2">
             <img src="img/5.webp" alt="Example Image 1">
             <img src="img/7.webp" alt="Example Image 3">
-            <!--<img src="img/9.png" alt="Example Image 5">
-            <img src="img/12.png" alt="Example Image 8"> -->
-            
-        
             <!-- Add more images as needed -->
         </div>
     </div>

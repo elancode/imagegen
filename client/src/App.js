@@ -16,10 +16,13 @@ import {
     DialogContent,
     DialogActions,
     LinearProgress,
-    useMediaQuery
+    useMediaQuery,
+    Menu,
+    MenuItem
 } from '@mui/material';
 import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AccountCircle from '@mui/icons-material/AccountCircle';
 
 function App() {
     const theme = useTheme();
@@ -62,6 +65,8 @@ function App() {
     const [retryCount, setRetryCount] = useState(0);
     const maxRetries = 3; // Set a maximum number of retries
     const [imageGeneratedNotification, setImageGeneratedNotification] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [email, setEmail] = useState(() => localStorage.getItem('userEmail') || '');
 
     // Define your trigger word used during training
     const triggerWord = 'USER'; // Replace with your actual trigger word
@@ -386,6 +391,7 @@ function App() {
         setGeneratedImage(null); // Clear the last generated image
         setError(null); // Clear any error messages
         setShowAuth(true);
+        setAnchorEl(null); // Ensure the menu is closed after logout
     };
 
     const handleImageClick = (image) => {
@@ -413,29 +419,54 @@ function App() {
         }
     }, [userModels]);
 
+    const handleAccountClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleLogin = () => {
+        // Logic to show login dialog or redirect to login page
+        console.log("Login/Register button clicked");
+        // Example: Redirect to login page
+        window.location.href = '/login'; // Replace with your actual login page URL
+        setAnchorEl(null); // Ensure the menu is closed after login
+    };
+
     return (
         <Container maxWidth="md" onClick={handleUserAction}>
             <Box sx={{ my: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', mb: 3 }}>
-                    {/* Logo */}
-                    <img src={`${process.env.PUBLIC_URL}/greatshotslogo.png`} alt="GreatShots Logo" style={{ maxWidth: '100px', height: 'auto', marginRight: '10px' }} />
-                    {/* New Title Logo */}
-                    <img src={`${process.env.PUBLIC_URL}/greatshotstextlogo.png`} alt="New Logo" style={{ maxWidth: '200px', height: 'auto' }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {/* Logo */}
+                        <img src={`${process.env.PUBLIC_URL}/greatshotslogo.png`} alt="GreatShots Logo" style={{ maxWidth: '50px', height: 'auto', marginRight: '10px' }} />
+                        {/* New Title Logo */}
+                        <img src={`${process.env.PUBLIC_URL}/greatshotstextlogo.png`} alt="New Logo" style={{ maxWidth: '150px', height: 'auto' }} />
+                    </Box>
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={handleAccountClick}
+                        
+                    >
+                        <AccountCircle sx={{ fontSize: '2.5rem' }} />
+                    </IconButton>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                    >
+                        <MenuItem disabled>{userEmail}</MenuItem>
+                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                    </Menu>
                 </Box>
             </Box>
 
             {token && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                    <Typography variant="body2">
-                        {userEmail}
-                    </Typography>
-                    <Button 
-                        variant="outlined" 
-                        color="secondary" 
-                        onClick={handleLogout}
-                    >
-                        Logout
-                    </Button>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
+                    {/* Account menu logic remains here */}
                 </Box>
             )}
 
