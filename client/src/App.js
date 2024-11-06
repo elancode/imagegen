@@ -578,7 +578,7 @@ function App() {
                             Train a Model
                         </Typography>
                         <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                            Train a model with images of you from different directions. 7-12 images will work well.
+                            Train a model with images of you from different directions. 7-12 images will work well. The training process will take about 20 minutes.
                         </Typography>
                         <input
                             accept="image/*"
