@@ -65,6 +65,58 @@ app.use(cors({
     origin: '*', // This allows all origins
     credentials: true // If you need to include credentials like cookies, set this to true
 }));
+
+
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+
+    let event;
+    try {
+        // Construct the event using the raw body and the signature
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        console.log('Received Stripe event:', event.type);
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        console.log('Checkout session completed:', session);
+
+        // Retrieve the user from your database
+        const user = await User.findById(session.client_reference_id);
+        if (!user) {
+            console.error('User not found for session:', session.client_reference_id);
+            return res.status(404).send('User not found');
+        }
+
+        try {
+            // Update user credits
+            user.modelTrainingCredits += 1; // Example: Add 1 model credit
+            user.imageGenerationCredits += 10; // Example: Add 10 image credits
+            await user.save();
+
+            // Log the transaction
+            const transaction = new Transaction({
+                userId: user._id,
+                amount: session.amount_total,
+                currency: session.currency,
+                createdAt: new Date(),
+            });
+            await transaction.save();
+            console.log('Transaction recorded:', transaction);
+        } catch (error) {
+            console.error('Error recording transaction:', error);
+            return res.status(500).send('Error recording transaction');
+        }
+    }
+
+    res.json({ received: true });
+});
+
+
+
 app.use(express.json());
 
 // Authentication middleware
@@ -537,58 +589,12 @@ app.post('/api/create-checkout-session', authenticateToken, async (req, res) => 
     }
 });
 
-app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
 
-    let event;
-    try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-        console.log('Received Stripe event:', event.type);
-    } catch (err) {
-        console.error('Webhook signature verification failed:', err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
-        console.log('Checkout session completed:', session);
-
-        // Retrieve the user from your database
-        const user = await User.findById(session.client_reference_id);
-        if (!user) {
-            console.error('User not found for session:', session.client_reference_id);
-            return res.status(404).send('User not found');
-        }
-
-        try {
-            // Update user credits
-            user.modelTrainingCredits += 1; // Example: Add 1 model credit
-            user.imageGenerationCredits += 10; // Example: Add 10 image credits
-            await user.save();
-
-            // Log the transaction
-            const transaction = new Transaction({
-                userId: user._id,
-                amount: session.amount_total,
-                currency: session.currency,
-                createdAt: new Date(),
-            });
-            await transaction.save();
-            console.log('Transaction recorded:', transaction);
-        } catch (error) {
-            console.error('Error recording transaction:', error);
-            return res.status(500).send('Error recording transaction');
-        }
-    }
-
-    res.json({ received: true });
-});
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
-
 const storage = new Storage();
 const bucketName = process.env.GCS_BUCKET_NAME;
 
