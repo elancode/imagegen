@@ -36,11 +36,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    modelTrainingCredits: { type: Number, default: 1 }, // Start with 1 credit
-    imageGenerationCredits: { type: Number, default: 5 }, // Start with 5 credits
+    modelTrainingCredits: { type: Number, default: 3 }, // Start with 1 credit
+    imageGenerationCredits: { type: Number, default: 50 }, // Start with 5 credits
     models: [{
         modelId: String,
         name: String,
+        customName: String,
         createdAt: Date,
         status: String
     }],
@@ -485,6 +486,26 @@ app.get('/api/user-credits', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Error fetching user credits:', error);
         res.status(500).json({ error: 'Failed to fetch user credits' });
+    }
+});
+
+// Endpoint to update model custom name
+app.put('/api/models/:modelId/custom-name', authenticateToken, async (req, res) => {
+    try {
+        const { customName } = req.body;
+        const model = req.user.models.find(m => m.modelId === req.params.modelId);
+
+        if (!model) {
+            return res.status(404).json({ error: 'Model not found' });
+        }
+
+        model.customName = customName;
+        await req.user.save();
+
+        res.json({ message: 'Custom name updated successfully' });
+    } catch (error) {
+        console.error('Error updating custom name:', error);
+        res.status(500).json({ error: 'Failed to update custom name' });
     }
 });
 

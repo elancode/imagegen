@@ -72,6 +72,9 @@ function App() {
     const [imageGenerationCredits, setImageGenerationCredits] = useState(0);
     const [creditError, setCreditError] = useState(''); // State for credit error message
     const [trainingCreditError, setTrainingCreditError] = useState(''); // State for training credit error message
+    const [imageLoading, setImageLoading] = useState(false); // New state for image generation loading
+    const [editingModelId, setEditingModelId] = useState(null); // State to track which model is being renamed
+    const [newCustomName, setNewCustomName] = useState(''); // State for new custom name input
 
     // Define your trigger word used during training
     const triggerWord = 'USER'; // Replace with your actual trigger word
@@ -314,7 +317,7 @@ function App() {
     const handleGenerate = async () => {
         if (!selectedModelId || !prompt) return;
 
-        setLoading(true);
+        setImageLoading(true); // Set image loading state
         setError(null);
         setCreditError(''); // Clear previous credit error
 
@@ -353,7 +356,7 @@ function App() {
             console.error('Error:', error);
             setError(error.message || 'Failed to generate image');
         } finally {
-            setLoading(false);
+            setImageLoading(false); // Reset image loading state
         }
     };
 
@@ -493,6 +496,57 @@ function App() {
         setTrainingCreditError(''); // Clear the training credit error on any user interaction
     };
 
+    const handleRename = (modelId) => {
+        setEditingModelId(modelId);
+        setNewCustomName('name'); // Set default text to "name"
+    };
+
+    const saveCustomName = async (modelId) => {
+        try {
+            await fetch(`${process.env.REACT_APP_SERVER_URL}/models/${modelId}/custom-name`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ customName: newCustomName }),
+            });
+
+            setUserModels(prevModels => prevModels.map(model => 
+                model.modelId === modelId ? { ...model, customName: newCustomName } : model
+            ));
+            setEditingModelId(null);
+        } catch (error) {
+            console.error('Error saving custom name:', error);
+        }
+    };
+
+    const handleOutsideClick = (event) => {
+        if (editingModelId && !event.target.closest('.edit-box')) {
+            setEditingModelId(null); // Close the edit box without saving changes
+        }
+    };
+
+    useEffect(() => {
+        if (editingModelId) {
+            document.addEventListener('click', handleOutsideClick);
+        } else {
+            document.removeEventListener('click', handleOutsideClick);
+        }
+
+        return () => {
+            document.removeEventListener('click', handleOutsideClick);
+        };
+    }, [editingModelId]);
+
+    const handleBuyCredits = () => {
+        // Logic to handle buying credits
+        // This could be a redirect to a purchase page or opening a dialog
+        console.log("Buy Credits clicked");
+        // Example: Redirect to a purchase page
+        window.location.href = '/buy-credits'; // Replace with your actual purchase page URL
+    };
+
     return (
         <Container maxWidth="md" onClick={handleUserInteraction}>
             <Box sx={{ my: 2 }}>
@@ -520,6 +574,7 @@ function App() {
                         <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Model Credits: {modelTrainingCredits}</MenuItem>
                         <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Image Credits: {imageGenerationCredits}</MenuItem>
                         <Divider />
+                        <MenuItem onClick={handleBuyCredits} sx={{ padding: '4px 16px', minHeight: '32px' }}>Buy Credits</MenuItem>
                         <MenuItem onClick={handleLogout} sx={{ padding: '4px 16px', minHeight: '32px' }}>Logout</MenuItem>
                     </Menu>
                 </Box>
@@ -630,11 +685,11 @@ function App() {
                             <Button
                                 variant="contained"
                                 onClick={handleGenerate}
-                                disabled={loading || !prompt || !selectedModelId}
+                                disabled={imageLoading || !prompt || !selectedModelId}
                                 fullWidth
                                 sx={{ mt: 2 }}
                             >
-                                {loading ? <CircularProgress size={24} /> : 'Generate Image'}
+                                {imageLoading ? <CircularProgress size={24} /> : 'Generate Image'}
                             </Button>
                         </Paper>
                     )}
@@ -649,14 +704,33 @@ function App() {
                             </Typography>
                             <ul>
                                 {userModels.map((model, index) => (
-                                    <li key={index}>
+                                    <li key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                                         <Button
                                             variant={selectedModelId === model.modelId ? 'contained' : 'outlined'}
                                             onClick={() => setSelectedModelId(model.modelId)}
                                             disabled={model.status !== 'succeeded'} // Disable if not succeeded
+                                            sx={{ marginRight: '8px', width: '300px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
                                         >
-                                            {model.name} - {model.status} - Created on {new Date(model.createdAt).toLocaleDateString()}
+                                            {model.customName || model.name}
                                         </Button>
+                                        {editingModelId === model.modelId ? (
+                                            <div className="edit-box" style={{ display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                                                <TextField
+                                                    value={newCustomName}
+                                                    onChange={(e) => setNewCustomName(e.target.value)}
+                                                    size="small"
+                                                    sx={{ marginRight: '8px' }}
+                                                    autoFocus // Automatically focus the input when opened
+                                                />
+                                                <Button onClick={() => saveCustomName(model.modelId)} size="small">
+                                                    Save
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <Button onClick={(e) => { e.stopPropagation(); handleRename(model.modelId); }} size="small">
+                                                Rename
+                                            </Button>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
