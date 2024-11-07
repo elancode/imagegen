@@ -17,6 +17,7 @@ const { Storage } = require('@google-cloud/storage');
 const { v4: uuidv4 } = require('uuid');
 const sharp = require('sharp');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 
 // Initialize Replicate client
@@ -73,7 +74,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     let event;
     try {
         // Construct the event using the raw body and the signature
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
         console.log('Received Stripe event:', event.type);
     } catch (err) {
         console.error('Webhook signature verification failed:', err.message);
