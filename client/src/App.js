@@ -18,7 +18,8 @@ import {
     LinearProgress,
     useMediaQuery,
     Menu,
-    MenuItem
+    MenuItem,
+    Divider
 } from '@mui/material';
 import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -67,6 +68,10 @@ function App() {
     const [imageGeneratedNotification, setImageGeneratedNotification] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [email, setEmail] = useState(() => localStorage.getItem('userEmail') || '');
+    const [modelTrainingCredits, setModelTrainingCredits] = useState(0);
+    const [imageGenerationCredits, setImageGenerationCredits] = useState(0);
+    const [creditError, setCreditError] = useState(''); // State for credit error message
+    const [trainingCreditError, setTrainingCreditError] = useState(''); // State for training credit error message
 
     // Define your trigger word used during training
     const triggerWord = 'USER'; // Replace with your actual trigger word
@@ -89,6 +94,34 @@ function App() {
             pollTrainingStatus(modelId);
         }
     }, [token, loading]);
+
+    useEffect(() => {
+        // Fetch user credits when the component mounts
+        const fetchUserCredits = async () => {
+            try {
+                const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/user-credits`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user credits');
+                }
+
+                const data = await response.json();
+                console.log('Fetched credits:', data); // Debugging: Log the fetched data
+                setModelTrainingCredits(data.modelTrainingCredits);
+                setImageGenerationCredits(data.imageGenerationCredits);
+            } catch (error) {
+                console.error('Error fetching user credits:', error);
+            }
+        };
+
+        if (token) {
+            fetchUserCredits();
+        }
+    }, [token]);
 
     const fetchUserModels = async () => {
         try {
@@ -184,6 +217,7 @@ function App() {
         setLoading(true);
         updateTrainStatus('training');
         setError(null);
+        setTrainingCreditError(''); // Clear previous training credit error
 
         const formData = new FormData();
         uploadedFiles.forEach((file, index) => {
@@ -200,7 +234,14 @@ function App() {
             });
 
             if (!response.ok) {
-                throw new Error('Training failed to start');
+                const errorData = await response.json();
+                if (errorData.error === 'No model training credits available') {
+                    setTrainingCreditError('You have used all of your model training credits');
+                } else {
+                    throw new Error(errorData.error || 'Training failed to start');
+                }
+                setLoading(false); // Ensure loading is set to false if training is blocked
+                return;
             }
 
             const data = await response.json();
@@ -212,6 +253,7 @@ function App() {
             console.error('Error:', error);
             setError('Failed to start training');
             updateTrainStatus('failed');
+            setLoading(false); // Ensure loading is set to false on error
         }
     };
 
@@ -274,6 +316,7 @@ function App() {
 
         setLoading(true);
         setError(null);
+        setCreditError(''); // Clear previous credit error
 
         try {
             const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/generate`, {
@@ -290,7 +333,12 @@ function App() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Generation failed');
+                if (errorData.error === 'No image generation credits available') {
+                    setCreditError('You have used all of your image generation credits');
+                } else {
+                    throw new Error(errorData.error || 'Generation failed');
+                }
+                return;
             }
 
             const data = await response.json();
@@ -392,6 +440,11 @@ function App() {
         setError(null); // Clear any error messages
         setShowAuth(true);
         setAnchorEl(null); // Ensure the menu is closed after logout
+
+        // Clear the prompt and uploaded files
+        setPrompt(''); // Clear the prompt in the image generation text field
+        setUploadedFiles([]); // Clear any images selected in the training block
+        setPreviewUrls([]); // Clear preview URLs
     };
 
     const handleImageClick = (image) => {
@@ -435,8 +488,13 @@ function App() {
         setAnchorEl(null); // Ensure the menu is closed after login
     };
 
+    const handleUserInteraction = () => {
+        setCreditError(''); // Clear the credit error on any user interaction
+        setTrainingCreditError(''); // Clear the training credit error on any user interaction
+    };
+
     return (
-        <Container maxWidth="md" onClick={handleUserAction}>
+        <Container maxWidth="md" onClick={handleUserInteraction}>
             <Box sx={{ my: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -458,7 +516,11 @@ function App() {
                         onClose={handleMenuClose}
                     >
                         <MenuItem disabled>{userEmail}</MenuItem>
-                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                        <Divider />
+                        <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Model Credits: {modelTrainingCredits}</MenuItem>
+                        <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Image Credits: {imageGenerationCredits}</MenuItem>
+                        <Divider />
+                        <MenuItem onClick={handleLogout} sx={{ padding: '4px 16px', minHeight: '32px' }}>Logout</MenuItem>
                     </Menu>
                 </Box>
             </Box>
@@ -555,10 +617,8 @@ function App() {
                             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                                 Remember to include the hotword "USER" in your prompt, e.g. USER as a king
                             </Typography>
-                            {imageGeneratedNotification && (
-                                <Alert severity="success" sx={{ mb: 2 }}>
-                                    New image successfully generated.
-                                </Alert>
+                            {creditError && (
+                                <Alert severity="error" sx={{ mb: 2 }}>{creditError}</Alert>
                             )}
                             <TextField
                                 fullWidth
@@ -608,8 +668,11 @@ function App() {
                             Train a Model
                         </Typography>
                         <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                            Train a model with images of you from different directions. 7-12 images will work well. The training process will take about 20 minutes.
+                            Train a model with images of the subject from different directions. 7-12 images will work well. The training process will take about 20 minutes.
                         </Typography>
+                        {trainingCreditError && (
+                            <Alert severity="error" sx={{ mb: 2 }}>{trainingCreditError}</Alert>
+                        )}
                         <input
                             accept="image/*"
                             type="file"
@@ -620,7 +683,7 @@ function App() {
                         />
                         <label htmlFor="upload-button">
                             <Button variant="contained" component="span" fullWidth>
-                                Upload Photos ({uploadedFiles.length}/20)
+                                Select Photos ({uploadedFiles.length}/20)
                             </Button>
                         </label>
 
@@ -646,7 +709,7 @@ function App() {
                             variant="contained"
                             color="primary"
                             onClick={handleTrain}
-                            disabled={loading || uploadedFiles.length === 0 || trainStatus === 'training'}
+                            disabled={loading || uploadedFiles.length === 0}
                             fullWidth
                             sx={{ mt: 2 }}
                         >
@@ -654,7 +717,7 @@ function App() {
                         </Button>
                     </Paper>
 
-                    {trainStatus === 'training' && (
+                    {trainStatus === 'training' && loading && (
                         <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
                             <Typography variant="h6" gutterBottom>
                                 Training Status
@@ -723,9 +786,9 @@ function App() {
                         </Paper>
                     )}
 
-                    {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
-                    )}
+                    {/* {creditError && (
+                        <Alert severity="error" sx={{ mb: 2 }}>{creditError}</Alert>
+                    )} */}
 
                     {/* Image Overlay */}
                     <Dialog open={overlayOpen} onClose={handleOverlayClose} maxWidth="lg">

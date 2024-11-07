@@ -36,6 +36,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    modelTrainingCredits: { type: Number, default: 1 }, // Start with 1 credit
+    imageGenerationCredits: { type: Number, default: 5 }, // Start with 5 credits
     models: [{
         modelId: String,
         name: String,
@@ -152,6 +154,11 @@ app.get('/api/models', authenticateToken, async (req, res) => {
 // Endpoint to generate images with trained model
 app.post('/api/generate', authenticateToken, async (req, res) => {
     try {
+        // Check if the user has image generation credits
+        if (req.user.imageGenerationCredits <= 0) {
+            return res.status(400).json({ error: 'No image generation credits available' });
+        }
+
         const { modelId, prompt } = req.body;
 
         // Retrieve the model from the user's account
@@ -238,6 +245,10 @@ app.post('/api/generate', authenticateToken, async (req, res) => {
                 prompt,
                 modelName: model.name
             });
+            await req.user.save();
+
+            // Deduct an image generation credit
+            req.user.imageGenerationCredits -= 1;
             await req.user.save();
 
             res.json({ output: [gcsUrl] });
@@ -342,6 +353,11 @@ const baseModelVersionId = 'd995297071a44dcb72244e6c19462111649ec86a9646c32df56d
 // Update the `/train` endpoint
 app.post('/api/train', authenticateToken, upload.array('images', 20), async (req, res) => {
     try {
+        // Check if the user has model training credits
+        if (req.user.modelTrainingCredits <= 0) {
+            return res.status(400).json({ error: 'No model training credits available' });
+        }
+
         console.log('Starting training process...');
         const files = req.files;
 
@@ -446,11 +462,29 @@ app.post('/api/train', authenticateToken, upload.array('images', 20), async (req
         });
         await req.user.save();
 
+        // Deduct a model training credit
+        req.user.modelTrainingCredits -= 1;
+        await req.user.save();
+
         res.json({ modelId: training.id });
 
     } catch (error) {
         console.error('Training error:', error.response?.data || error.message);
         res.status(500).json({ error: 'Failed to start training', details: error.message });
+    }
+});
+
+// Endpoint to get user credits
+app.get('/api/user-credits', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        res.json({
+            modelTrainingCredits: user.modelTrainingCredits,
+            imageGenerationCredits: user.imageGenerationCredits
+        });
+    } catch (error) {
+        console.error('Error fetching user credits:', error);
+        res.status(500).json({ error: 'Failed to fetch user credits' });
     }
 });
 
