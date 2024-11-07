@@ -606,6 +606,10 @@ function App() {
                             onChange={(e) => setAuthEmail(e.target.value)}
                             margin="normal"
                             required
+                            autoComplete="email" // Ensure correct autocomplete attribute
+                            InputLabelProps={{
+                                shrink: true, // Force label to shrink
+                            }}
                         />
                         <TextField
                             fullWidth
@@ -615,6 +619,10 @@ function App() {
                             onChange={(e) => setAuthPassword(e.target.value)}
                             margin="normal"
                             required
+                            autoComplete="current-password" // Ensure correct autocomplete attribute
+                            InputLabelProps={{
+                                shrink: true, // Force label to shrink
+                            }}
                         />
                         {!isLogin && (
                             <Typography variant="body2" sx={{ mt: 2 }}>
