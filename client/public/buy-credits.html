@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Credits</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        body {
+            background-color: #edefee;
+            font-family: 'Roboto', sans-serif;
+        }
+        .header {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .logo {
+            max-width: 30px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .text-logo {
+            height: 20px;
+            width: auto;
+            vertical-align: middle;
+            object-fit: contain;
+        }
+        .product-card {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 140px;
+            height: 300px;
+            background-color: white;
+            flex-shrink: 0;
+            flex-grow: 0;
+        }
+        .product-card h5 {
+            margin-bottom: 10px;
+            min-height: 50px;
+            color: #333;
+        }
+        .product-card h6 {
+            margin-bottom: 10px;
+            color: #007bff;
+        }
+        .product-card p {
+            margin-bottom: 20px;
+            min-height: 60px;
+            color: #666;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .col {
+            display: flex;
+            justify-content: center;
+            flex: 0 0 auto;
+        }
+        .btn-custom {
+            background-color: #001aff9a;
+            color: white;
+            border-radius: 8px;
+            padding: 20px 40px;
+            font-weight: bold;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="greatshotslogo.png" alt="Company Logo" class="logo">
+        <img src="greatshotstextlogo.png" alt="Company Logo" class="text-logo">
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m4">
+                <div class="product-card">
+                    <h5>Trial Pack</h5>
+                    <h6>$15</h6>
+                    <p>1 model credit and 25 image credits</p>
+                   
+                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href=' https://buy.stripe.com/test_8wMeWd60Xg03fXqfYY'">CHOOSE</button>
+                   <!---
+                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href='https://buy.stripe.com/7sIbJe08B7Dm5Ko289'">CHOOSE</button>
+                    -->
+                </div>
+            </div>
+            <div class="col s12 m4">
+                <div class="product-card">
+                    <h5>Standard Plan</h5>
+                    <h6>$25 / month</h6>
+                    <p>2 model credits and 50 image credits each month</p>
+                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href='https://buy.stripe.com/14k4gM1cF6zidcQ8wy'">CHOOSE</button>
+                </div>
+            </div>
+            <div class="col s12 m4">
+                <div class="product-card">
+                    <h5>Premium Plan</h5>
+                    <h6>$40 / month</h6>
+                    <p>4 model credits and 200 image credits each month</p>
+                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href='https://buy.stripe.com/5kAcNidZr4ra8WA9AD'">CHOOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handlePurchase(productName) {
+            console.log(`Purchasing: ${productName}`);
+            // Implement the logic to handle the purchase
+            // Redirect to the checkout session creation endpoint
+        }
+    </script>
+</body>
+</html> 

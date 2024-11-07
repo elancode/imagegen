@@ -24,6 +24,7 @@ import {
 import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import { loadStripe } from '@stripe/stripe-js';
 
 function App() {
     const theme = useTheme();
@@ -540,11 +541,8 @@ function App() {
     }, [editingModelId]);
 
     const handleBuyCredits = () => {
-        // Logic to handle buying credits
-        // This could be a redirect to a purchase page or opening a dialog
-        console.log("Buy Credits clicked");
-        // Example: Redirect to a purchase page
-        window.location.href = '/buy-credits'; // Replace with your actual purchase page URL
+        // Redirect to the buy credits HTML page
+        window.location.href = '/buy-credits.html';
     };
 
     const handleHelp = () => {

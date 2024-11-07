@@ -3,6 +3,8 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const dotenv = require('dotenv');
+dotenv.config();
+
 const axios = require('axios');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
@@ -14,8 +16,8 @@ const FormData = require('form-data');
 const { Storage } = require('@google-cloud/storage');
 const { v4: uuidv4 } = require('uuid');
 const sharp = require('sharp');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-dotenv.config();
 
 // Initialize Replicate client
 const replicate = new Replicate({
@@ -509,6 +511,79 @@ app.put('/api/models/:modelId/custom-name', authenticateToken, async (req, res) 
     }
 });
 
+app.post('/api/create-checkout-session', authenticateToken, async (req, res) => {
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'usd',
+                    product_data: {
+                        name: 'Credit Pack',
+                    },
+                    unit_amount: 2000, // $20.00
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL}/cancel`,
+        });
+
+        res.json({ id: session.id });
+    } catch (error) {
+        console.error('Error creating checkout session:', error);
+        res.status(500).json({ error: 'Failed to create checkout session' });
+    }
+});
+
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+
+    let event;
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        console.log('Received Stripe event:', event.type);
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        console.log('Checkout session completed:', session);
+
+        // Retrieve the user from your database
+        const user = await User.findById(session.client_reference_id);
+        if (!user) {
+            console.error('User not found for session:', session.client_reference_id);
+            return res.status(404).send('User not found');
+        }
+
+        try {
+            // Update user credits
+            user.modelTrainingCredits += 1; // Example: Add 1 model credit
+            user.imageGenerationCredits += 10; // Example: Add 10 image credits
+            await user.save();
+
+            // Log the transaction
+            const transaction = new Transaction({
+                userId: user._id,
+                amount: session.amount_total,
+                currency: session.currency,
+                createdAt: new Date(),
+            });
+            await transaction.save();
+            console.log('Transaction recorded:', transaction);
+        } catch (error) {
+            console.error('Error recording transaction:', error);
+            return res.status(500).send('Error recording transaction');
+        }
+    }
+
+    res.json({ received: true });
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
@@ -526,4 +601,16 @@ async function uploadToGCS(filePath, destination) {
         },
     });
     console.log(`${filePath} uploaded to ${bucketName}/${destination}`);
-} 
+}
+
+console.log('Stripe Secret Key:', process.env.STRIPE_SECRET_KEY);
+
+// Transaction Model
+const TransactionSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    amount: { type: Number, required: true },
+    currency: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+});
+
+const Transaction = mongoose.model('Transaction', TransactionSchema);
