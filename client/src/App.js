@@ -547,6 +547,11 @@ function App() {
         window.location.href = '/buy-credits'; // Replace with your actual purchase page URL
     };
 
+    const handleHelp = () => {
+        // Redirect to the help page
+        window.location.href = '/help.html';
+    };
+
     return (
         <Container maxWidth="md" onClick={handleUserInteraction}>
             <Box sx={{ my: 2 }}>
@@ -575,6 +580,7 @@ function App() {
                         <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Image Credits: {imageGenerationCredits}</MenuItem>
                         <Divider />
                         <MenuItem onClick={handleBuyCredits} sx={{ padding: '4px 16px', minHeight: '32px' }}>Buy Credits</MenuItem>
+                        <MenuItem onClick={handleHelp} sx={{ padding: '4px 16px', minHeight: '32px' }}>Help</MenuItem>
                         <MenuItem onClick={handleLogout} sx={{ padding: '4px 16px', minHeight: '32px' }}>Logout</MenuItem>
                     </Menu>
                 </Box>
