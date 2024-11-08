@@ -70,7 +70,7 @@ app.use(cors({
 
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
-
+    console.log('in webhook');
     let event;
     try {
         // Construct the event using the raw body and the signature
