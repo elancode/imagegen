@@ -10,8 +10,6 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function BuyCredits({ onClose }) {
-
-console.log('Stripe Public Key:', process.env.REACT_APP_STRIPE_PUBLIC_KEY);
   const initiateCheckout = async (priceId) => {
     try {
       const token = localStorage.getItem('token');
@@ -23,13 +21,13 @@ console.log('Stripe Public Key:', process.env.REACT_APP_STRIPE_PUBLIC_KEY);
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ priceId }),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const session = await response.json();
@@ -56,15 +54,20 @@ console.log('Stripe Public Key:', process.env.REACT_APP_STRIPE_PUBLIC_KEY);
         </Button>
       </Box>
 
-
-
       {/* Products Grid */}
       <Grid container spacing={3} justifyContent="center">
         {/* Trial Pack */}
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} sx={{ padding: 2, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h5" gutterBottom>Trial Pack</Typography>
-            <Typography variant="h6" gutterBottom>$15</Typography>
+          <Paper
+            elevation={3}
+            sx={{ padding: 2, textAlign: 'center', borderRadius: 2 }}
+          >
+            <Typography variant="h5" gutterBottom>
+              Trial Pack
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              $15
+            </Typography>
             <Typography variant="body1" gutterBottom>
               1 model credit and 25 image credits
             </Typography>
@@ -82,9 +85,16 @@ console.log('Stripe Public Key:', process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
         {/* Standard Plan */}
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} sx={{ padding: 2, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h5" gutterBottom>Standard Plan</Typography>
-            <Typography variant="h6" gutterBottom>$25 / month</Typography>
+          <Paper
+            elevation={3}
+            sx={{ padding: 2, textAlign: 'center', borderRadius: 2 }}
+          >
+            <Typography variant="h5" gutterBottom>
+              Standard Plan
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              $25 / month
+            </Typography>
             <Typography variant="body1" gutterBottom>
               2 model credits and 50 image credits each month
             </Typography>
@@ -102,9 +112,16 @@ console.log('Stripe Public Key:', process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
         {/* Premium Plan */}
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} sx={{ padding: 2, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="h5" gutterBottom>Premium Plan</Typography>
-            <Typography variant="h6" gutterBottom>$40 / month</Typography>
+          <Paper
+            elevation={3}
+            sx={{ padding: 2, textAlign: 'center', borderRadius: 2 }}
+          >
+            <Typography variant="h5" gutterBottom>
+              Premium Plan
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              $40 / month
+            </Typography>
             <Typography variant="body1" gutterBottom>
               4 model credits and 200 image credits each month
             </Typography>
