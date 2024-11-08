@@ -39,8 +39,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    modelTrainingCredits: { type: Number, default: 3 }, // Start with 1 credit
-    imageGenerationCredits: { type: Number, default: 50 }, // Start with 5 credits
+    modelTrainingCredits: { type: Number, default: 0 }, // Start with 1 credit
+    imageGenerationCredits: { type: Number, default: 0 }, // Start with 5 credits
     models: [{
         modelId: String,
         name: String,
