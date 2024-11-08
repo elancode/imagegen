@@ -13,6 +13,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@google-cloud/storage": "^7.14.0",
+    "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
     "@stripe/stripe-js": "^4.9.0",
     "archiver": "^7.0.1",
