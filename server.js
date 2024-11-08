@@ -91,6 +91,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
                 console.log(`Product Name: ${product.name}`);
                 console.log(`Product Description: ${product.description}`);
+                console.log(`Quantity Purchased: ${item.quantity}`);
+                console.log(`Product Metadata: ${JSON.stringify(product.metadata)}`);
             }
 
             // Retrieve the user from your database
