@@ -550,6 +550,17 @@ function App() {
         window.location.href = '/help.html';
     };
 
+    useEffect(() => {
+        // Check if token exists in localStorage
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            setToken(storedToken);
+        } else {
+            // Handle case where token is not found
+            setShowAuth(true);
+        }
+    }, []);
+
     return (
         <Container maxWidth="md" onClick={handleUserInteraction}>
             <Box sx={{ my: 2 }}>
@@ -577,7 +588,7 @@ function App() {
                         <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Model Credits: {modelTrainingCredits}</MenuItem>
                         <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Image Credits: {imageGenerationCredits}</MenuItem>
                         <Divider />
-                        <MenuItem onClick={() => handleBuyCredits('price_1QIXMTFhmSaLvSL4WOcqXSzG')} sx={{ padding: '4px 16px', minHeight: '32px' }}>Buy Credits</MenuItem>
+                        <MenuItem onClick={handleBuyCredits} sx={{ padding: '4px 16px', minHeight: '32px' }}>Buy Credits</MenuItem>
                         <MenuItem onClick={handleHelp} sx={{ padding: '4px 16px', minHeight: '32px' }}>Help</MenuItem>
                         <MenuItem onClick={handleLogout} sx={{ padding: '4px 16px', minHeight: '32px' }}>Logout</MenuItem>
                     </Menu>
