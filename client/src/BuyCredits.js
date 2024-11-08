@@ -10,7 +10,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function BuyCredits({ onClose }) {
-  const initiateCheckout = async (priceId) => {
+  const initiateCheckout = async (priceId, mode) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -23,7 +23,7 @@ function BuyCredits({ onClose }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ priceId, mode }),
       });
 
       if (!response.ok) {
@@ -74,7 +74,7 @@ function BuyCredits({ onClose }) {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => initiateCheckout('price_1QIXOVFhmSaLvSL4I4EVJamc')}
+              onClick={() => initiateCheckout('price_1QIXOVFhmSaLvSL4I4EVJamc', 'payment')}
               sx={{ marginTop: 2, borderRadius: 1 }}
               fullWidth
             >
@@ -101,7 +101,7 @@ function BuyCredits({ onClose }) {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => initiateCheckout('price_1QIXrAFhmSaLvSL43cZ0UMMM')}
+              onClick={() => initiateCheckout('price_1QIXrAFhmSaLvSL43cZ0UMMM', 'subscription')}
               sx={{ marginTop: 2, borderRadius: 1 }}
               fullWidth
             >
@@ -128,7 +128,7 @@ function BuyCredits({ onClose }) {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => initiateCheckout('price_1QIXsNFhmSaLvSL43RiC9dDv')}
+              onClick={() => initiateCheckout('price_1QIXsNFhmSaLvSL43RiC9dDv', 'subscription')}
               sx={{ marginTop: 2, borderRadius: 1 }}
               fullWidth
             >

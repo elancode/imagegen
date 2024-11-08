@@ -589,16 +589,16 @@ app.put('/api/models/:modelId/custom-name', authenticateToken, async (req, res) 
 
 app.post('/api/create-checkout-session', authenticateToken, async (req, res) => {
     try {
-        const { priceId } = req.body; // Expecting priceId from the client
+        const { priceId, mode } = req.body; // Accept 'mode' from the request body
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
-                price: priceId, // Use the price ID from your Stripe product catalog
+                price: priceId,
                 quantity: 1,
             }],
-            mode: 'payment',
-            client_reference_id: req.user._id.toString(), // Pass the user ID
+            mode: mode, // Set the mode ('payment' or 'subscription')
+            client_reference_id: req.user._id.toString(),
             success_url: `${process.env.REACT_APP_CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.REACT_APP_CLIENT_URL}/cancel`,
         });
