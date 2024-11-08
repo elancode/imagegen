@@ -10,6 +10,8 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function BuyCredits({ onClose }) {
+
+console.log('Stripe Public Key:', process.env.REACT_APP_STRIPE_PUBLIC_KEY);
   const initiateCheckout = async (priceId) => {
     try {
       const token = localStorage.getItem('token');
