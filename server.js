@@ -85,16 +85,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         try {
             const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
-            for (const item of lineItems.data) {
-                const productId = item.price.product;
-                const product = await stripe.products.retrieve(productId);
-
-                console.log(`Product Name: ${product.name}`);
-                console.log(`Product Description: ${product.description}`);
-                console.log(`Quantity Purchased: ${item.quantity}`);
-                console.log(`Product Metadata: ${JSON.stringify(product.metadata)}`);
-            }
-
             // Retrieve the user using client_reference_id
             const user = await User.findById(session.client_reference_id);
             if (!user) {
@@ -114,9 +104,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 console.log(`Quantity Purchased: ${item.quantity}`);
                 console.log(`Product Metadata: ${JSON.stringify(product.metadata)}`);
 
-                // Extract credits from product metadata
-                const modelCredits = parseInt(product.metadata.modelCredits) || 0;
-                const imageCredits = parseInt(product.metadata.imageCredits) || 0;
+                // Extract credits from product metadata using the updated keys
+                const modelCredits = parseInt(product.metadata.ModelCredits) || 0;
+                const imageCredits = parseInt(product.metadata.ImageCredits) || 0;
 
                 // Multiply credits by quantity purchased
                 totalModelCredits += modelCredits * item.quantity;
@@ -134,10 +124,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 amount: session.amount_total,
                 currency: session.currency,
                 createdAt: new Date(),
-                modelCreditsAdded: totalModelCredits, // Include model credits added
-                imageCreditsAdded: totalImageCredits, // Include image credits added
-                productId: lineItems.data[0].price.product, // Optionally store product ID
-                productName: lineItems.data[0].description, // Optionally store product name
+                modelCreditsAdded: totalModelCredits,
+                imageCreditsAdded: totalImageCredits,
+                productId: lineItems.data[0].price.product,
+                productName: lineItems.data[0].description,
             });
             await transaction.save();
             console.log('Transaction recorded:', transaction);
