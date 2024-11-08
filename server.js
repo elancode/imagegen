@@ -95,7 +95,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 console.log(`Product Metadata: ${JSON.stringify(product.metadata)}`);
             }
 
-            // Retrieve the user from your database
+            // Retrieve the user using client_reference_id
             const user = await User.findById(session.client_reference_id);
             if (!user) {
                 console.error('User not found for session:', session.client_reference_id);
@@ -574,19 +574,16 @@ app.put('/api/models/:modelId/custom-name', authenticateToken, async (req, res) 
 
 app.post('/api/create-checkout-session', authenticateToken, async (req, res) => {
     try {
+        const { priceId } = req.body; // Expecting priceId from the client
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
-                price_data: {
-                    currency: 'usd',
-                    product_data: {
-                        name: 'Credit Pack',
-                    },
-                    unit_amount: 2000, // $20.00
-                },
+                price: priceId, // Use the price ID from your Stripe product catalog
                 quantity: 1,
             }],
             mode: 'payment',
+            client_reference_id: req.user._id.toString(), // Pass the user ID
             success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.CLIENT_URL}/cancel`,
         });

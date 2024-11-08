@@ -97,11 +97,7 @@
                     <h5>Trial Pack</h5>
                     <h6>$15</h6>
                     <p>1 model credit and 25 image credits</p>
-                   
-                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href=' https://buy.stripe.com/test_8wMeWd60Xg03fXqfYY'">CHOOSE</button>
-                   <!---
-                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href='https://buy.stripe.com/7sIbJe08B7Dm5Ko289'">CHOOSE</button>
-                    -->
+                    <button class="btn waves-effect waves-light btn-custom" onclick="initiateCheckout('price_1QIXMTFhmSaLvSL4WOcqXSzG')">CHOOSE</button>
                 </div>
             </div>
             <div class="col s12 m4">
@@ -109,7 +105,7 @@
                     <h5>Standard Plan</h5>
                     <h6>$25 / month</h6>
                     <p>2 model credits and 50 image credits each month</p>
-                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href='https://buy.stripe.com/14k4gM1cF6zidcQ8wy'">CHOOSE</button>
+                    <button class="btn waves-effect waves-light btn-custom" onclick="initiateCheckout('price_1QIXrAFhmSaLvSL43cZ0UMMM')">CHOOSE</button>
                 </div>
             </div>
             <div class="col s12 m4">
@@ -117,17 +113,30 @@
                     <h5>Premium Plan</h5>
                     <h6>$40 / month</h6>
                     <p>4 model credits and 200 image credits each month</p>
-                    <button class="btn waves-effect waves-light btn-custom" onclick="window.location.href='https://buy.stripe.com/5kAcNidZr4ra8WA9AD'">CHOOSE</button>
+                    <button class="btn waves-effect waves-light btn-custom" onclick="initiateCheckout('price_1QIXsNFhmSaLvSL43RiC9dDv')">CHOOSE</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function handlePurchase(productName) {
-            console.log(`Purchasing: ${productName}`);
-            // Implement the logic to handle the purchase
-            // Redirect to the checkout session creation endpoint
+        async function initiateCheckout(priceId) {
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    body: JSON.stringify({ priceId }),
+                });
+
+                const session = await response.json();
+                const stripe = await loadStripe('your-public-key-here');
+                await stripe.redirectToCheckout({ sessionId: session.id });
+            } catch (error) {
+                console.error('Error initiating checkout:', error);
+            }
         }
     </script>
 </body>
