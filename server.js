@@ -584,8 +584,8 @@ app.post('/api/create-checkout-session', authenticateToken, async (req, res) => 
             }],
             mode: 'payment',
             client_reference_id: req.user._id.toString(), // Pass the user ID
-            success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_URL}/cancel`,
+            success_url: `${process.env.REACT_APP_CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.REACT_APP_CLIENT_URL}/cancel`,
         });
 
         res.json({ id: session.id });
