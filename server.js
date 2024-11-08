@@ -102,17 +102,42 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 return res.status(404).send('User not found');
             }
 
+            let totalModelCredits = 0;
+            let totalImageCredits = 0;
+
+            for (const item of lineItems.data) {
+                const productId = item.price.product;
+                const product = await stripe.products.retrieve(productId);
+
+                console.log(`Product Name: ${product.name}`);
+                console.log(`Product Description: ${product.description}`);
+                console.log(`Quantity Purchased: ${item.quantity}`);
+                console.log(`Product Metadata: ${JSON.stringify(product.metadata)}`);
+
+                // Extract credits from product metadata
+                const modelCredits = parseInt(product.metadata.modelCredits) || 0;
+                const imageCredits = parseInt(product.metadata.imageCredits) || 0;
+
+                // Multiply credits by quantity purchased
+                totalModelCredits += modelCredits * item.quantity;
+                totalImageCredits += imageCredits * item.quantity;
+            }
+
             // Update user credits
-            user.modelTrainingCredits += 1; // Example: Add 1 model credit
-            user.imageGenerationCredits += 10; // Example: Add 10 image credits
+            user.modelTrainingCredits += totalModelCredits;
+            user.imageGenerationCredits += totalImageCredits;
             await user.save();
 
-            // Log the transaction
+            // Log the transaction including the credits added
             const transaction = new Transaction({
                 userId: user._id,
                 amount: session.amount_total,
                 currency: session.currency,
                 createdAt: new Date(),
+                modelCreditsAdded: totalModelCredits, // Include model credits added
+                imageCreditsAdded: totalImageCredits, // Include image credits added
+                productId: lineItems.data[0].price.product, // Optionally store product ID
+                productName: lineItems.data[0].description, // Optionally store product name
             });
             await transaction.save();
             console.log('Transaction recorded:', transaction);
@@ -624,6 +649,10 @@ const TransactionSchema = new mongoose.Schema({
     amount: { type: Number, required: true },
     currency: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
+    modelCreditsAdded: { type: Number, default: 0 },
+    imageCreditsAdded: { type: Number, default: 0 },
+    productId: { type: String },
+    productName: { type: String },
 });
 
 const Transaction = mongoose.model('Transaction', TransactionSchema);
