@@ -577,7 +577,7 @@ function App() {
                         <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Model Credits: {modelTrainingCredits}</MenuItem>
                         <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>Image Credits: {imageGenerationCredits}</MenuItem>
                         <Divider />
-                        <MenuItem onClick={handleBuyCredits} sx={{ padding: '4px 16px', minHeight: '32px' }}>Buy Credits</MenuItem>
+                        <MenuItem onClick={() => handleBuyCredits('price_1QIXMTFhmSaLvSL4WOcqXSzG')} sx={{ padding: '4px 16px', minHeight: '32px' }}>Buy Credits</MenuItem>
                         <MenuItem onClick={handleHelp} sx={{ padding: '4px 16px', minHeight: '32px' }}>Help</MenuItem>
                         <MenuItem onClick={handleLogout} sx={{ padding: '4px 16px', minHeight: '32px' }}>Logout</MenuItem>
                     </Menu>
