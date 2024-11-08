@@ -74,7 +74,7 @@ function BuyCredits({ onClose }) {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => initiateCheckout('price_1QIXMTFhmSaLvSL4WOcqXSzG')}
+              onClick={() => initiateCheckout('price_1QIXOVFhmSaLvSL4I4EVJamc')}
               sx={{ marginTop: 2, borderRadius: 1 }}
               fullWidth
             >
