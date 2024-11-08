@@ -66,14 +66,11 @@ app.use(cors({
     origin: '*', // This allows all origins
     credentials: true // If you need to include credentials like cookies, set this to true
 }));
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
-    //console.log('in webhook');
-    //console.log('Raw body received:', req.body); // Should be a Buffer object
-    //console.log('Raw body as string:', req.body.toString());
+
     let event;
     try {
-        // Construct the event using the raw body and the signature
         event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
         console.log('Received Stripe event:', event.type);
     } catch (err) {
@@ -85,61 +82,42 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
         const session = event.data.object;
         console.log('Checkout session completed:', session);
 
-        stripe.checkout.sessions.listLineItems(session.id, (err, lineItems) => {
-            if (err) {
-                console.error('Error retrieving line items:', err);
-                return res.status(500).send('Error processing checkout session');
+        try {
+            const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+            for (const item of lineItems.data) {
+                const productId = item.price.product;
+                const product = await stripe.products.retrieve(productId);
+
+                console.log(`Product Name: ${product.name}`);
+                console.log(`Product Description: ${product.description}`);
             }
 
-            lineItems.data.forEach(async (item) => {
-                const productId = item.price.product;
-
-                // Retrieve full product details
-                stripe.products.retrieve(productId, (err, product) => {
-                    if (err) {
-                        console.error('Error retrieving product:', err);
-                        return;
-                    }
-
-                    console.log(`Product Name: ${product.name}`);
-                    // SKU is deprecated; use 'default_price' or other attributes instead
-                    console.log(`Product Description: ${product.description}`);
-                });
-            });
-
             // Retrieve the user from your database
-            User.findById(session.client_reference_id, (err, user) => {
-                if (err || !user) {
-                    console.error('User not found for session:', session.client_reference_id);
-                    return res.status(404).send('User not found');
-                }
+            const user = await User.findById(session.client_reference_id);
+            if (!user) {
+                console.error('User not found for session:', session.client_reference_id);
+                return res.status(404).send('User not found');
+            }
 
-                // Update user credits
-                user.modelTrainingCredits += 1; // Example: Add 1 model credit
-                user.imageGenerationCredits += 10; // Example: Add 10 image credits
-                user.save((err) => {
-                    if (err) {
-                        console.error('Error updating user credits:', err);
-                        return res.status(500).send('Error processing checkout session');
-                    }
+            // Update user credits
+            user.modelTrainingCredits += 1; // Example: Add 1 model credit
+            user.imageGenerationCredits += 10; // Example: Add 10 image credits
+            await user.save();
 
-                    // Log the transaction
-                    const transaction = new Transaction({
-                        userId: user._id,
-                        amount: session.amount_total,
-                        currency: session.currency,
-                        createdAt: new Date(),
-                    });
-                    transaction.save((err) => {
-                        if (err) {
-                            console.error('Error recording transaction:', err);
-                            return res.status(500).send('Error processing checkout session');
-                        }
-                        console.log('Transaction recorded:', transaction);
-                    });
-                });
+            // Log the transaction
+            const transaction = new Transaction({
+                userId: user._id,
+                amount: session.amount_total,
+                currency: session.currency,
+                createdAt: new Date(),
             });
-        });
+            await transaction.save();
+            console.log('Transaction recorded:', transaction);
+        } catch (error) {
+            console.error('Error processing checkout session:', error);
+            return res.status(500).send('Error processing checkout session');
+        }
     }
 
     res.json({ received: true });
