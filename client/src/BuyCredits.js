@@ -31,7 +31,7 @@ function BuyCredits({ onClose }) {
       }
 
       const session = await response.json();
-      const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
+      const stripe = await loadStripe(process.env.STRIPE_PUBLIC_KEY);
       await stripe.redirectToCheckout({ sessionId: session.id });
     } catch (error) {
       console.error('Error initiating checkout:', error);
