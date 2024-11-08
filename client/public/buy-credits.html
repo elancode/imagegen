@@ -141,7 +141,7 @@
                 }
 
                 const session = await response.json();
-                const stripe = await loadStripe('your-public-key-here');
+                const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
                 await stripe.redirectToCheckout({ sessionId: session.id });
             } catch (error) {
                 console.error('Error initiating checkout:', error);
