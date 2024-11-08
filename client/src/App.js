@@ -540,23 +540,9 @@ function App() {
         };
     }, [editingModelId]);
 
-    const handleBuyCredits = async (priceId) => {
-        try {
-            const response = await fetch('/api/create-checkout-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ priceId }),
-            });
-
-            const session = await response.json();
-            const stripe = await loadStripe(process.env.STRIPE_PUBLIC_KEY);
-            await stripe.redirectToCheckout({ sessionId: session.id });
-        } catch (error) {
-            console.error('Error initiating checkout:', error);
-        }
+    const handleBuyCredits = () => {
+        // Redirect to the buy credits HTML page
+        window.location.href = '/buy-credits.html';
     };
 
     const handleHelp = () => {

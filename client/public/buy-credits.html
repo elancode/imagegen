@@ -131,6 +131,10 @@
                     body: JSON.stringify({ priceId }),
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const session = await response.json();
                 const stripe = await loadStripe('your-public-key-here');
                 await stripe.redirectToCheckout({ sessionId: session.id });
