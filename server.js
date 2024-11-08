@@ -67,10 +67,11 @@ app.use(cors({
     credentials: true // If you need to include credentials like cookies, set this to true
 }));
 
-
-app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     const sig = req.headers['stripe-signature'];
     console.log('in webhook');
+    console.log('Raw body received:', req.body); // Should be a Buffer object
+    console.log('Raw body as string:', req.body.toString());
     let event;
     try {
         // Construct the event using the raw body and the signature
@@ -86,36 +87,45 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         console.log('Checkout session completed:', session);
 
         // Retrieve the user from your database
-        const user = await User.findById(session.client_reference_id);
-        if (!user) {
-            console.error('User not found for session:', session.client_reference_id);
-            return res.status(404).send('User not found');
-        }
+        User.findById(session.client_reference_id, (err, user) => {
+            if (err) {
+                console.error('Error finding user for session:', session.client_reference_id);
+                return res.status(500).send('Error finding user');
+            }
+            if (!user) {
+                console.error('User not found for session:', session.client_reference_id);
+                return res.status(404).send('User not found');
+            }
 
-        try {
             // Update user credits
             user.modelTrainingCredits += 1; // Example: Add 1 model credit
             user.imageGenerationCredits += 10; // Example: Add 10 image credits
-            await user.save();
+            user.save((err) => {
+                if (err) {
+                    console.error('Error saving user credits:', err);
+                    return res.status(500).send('Error saving user credits');
+                }
 
-            // Log the transaction
-            const transaction = new Transaction({
-                userId: user._id,
-                amount: session.amount_total,
-                currency: session.currency,
-                createdAt: new Date(),
+                // Log the transaction
+                const transaction = new Transaction({
+                    userId: user._id,
+                    amount: session.amount_total,
+                    currency: session.currency,
+                    createdAt: new Date(),
+                });
+                transaction.save((err) => {
+                    if (err) {
+                        console.error('Error recording transaction:', err);
+                        return res.status(500).send('Error recording transaction');
+                    }
+                    console.log('Transaction recorded:', transaction);
+                });
             });
-            await transaction.save();
-            console.log('Transaction recorded:', transaction);
-        } catch (error) {
-            console.error('Error recording transaction:', error);
-            return res.status(500).send('Error recording transaction');
-        }
+        });
     }
 
     res.json({ received: true });
 });
-
 
 
 app.use(express.json());
