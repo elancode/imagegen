@@ -68,9 +68,9 @@ app.use(cors({
 }));
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     const sig = req.headers['stripe-signature'];
-    console.log('in webhook');
-    console.log('Raw body received:', req.body); // Should be a Buffer object
-    console.log('Raw body as string:', req.body.toString());
+    //console.log('in webhook');
+    //console.log('Raw body received:', req.body); // Should be a Buffer object
+    //console.log('Raw body as string:', req.body.toString());
     let event;
     try {
         // Construct the event using the raw body and the signature
