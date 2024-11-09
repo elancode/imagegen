@@ -174,11 +174,14 @@ app.post('/api/auth/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create new user
+        // Create new user with initial credits
         const user = new User({
             email,
             password: hashedPassword,
-            models: []
+            modelTrainingCredits: 1,
+            imageGenerationCredits: 10,
+            models: [],
+            generatedImages: []
         });
 
         await user.save();
