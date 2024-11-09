@@ -27,6 +27,7 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import BuyCredits from './BuyCredits';
 import Help from './Help';
 import SplashPage from './SplashPage';
+import ReactGA from 'react-ga4';
 
 function App() {
     const theme = useTheme();
@@ -90,6 +91,10 @@ function App() {
         if (modelId && trainStatus === 'training') {
             pollTrainingStatus(modelId);
         }
+
+        // Initialize Google Analytics
+        ReactGA.initialize('G-MGCMG6QFCG');
+        ReactGA.send('pageview');
     }, [token, loading]);
 
         const fetchUserCredits = async () => {
