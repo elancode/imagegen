@@ -26,11 +26,11 @@ function Help({ onClose }) {
                     <h2>Help Topics</h2>
                     
                     {/* Help Content */}
-                    <h2>What does this service do?</h2>
-                    <p>This service allows you to train a personalized AI image generation model by uploading multiple selfies (7-10, up to a maximum of 20) of the same person. Once trained, you can use this model to generate new images of the user in different settings, styles, or even historical periods.</p>
+                    <h2>What do we do?</h2>
+                    <p>This site allows you to train a personalized AI image generation model by uploading multiple selfies (7-10, up to a maximum of 20) of the same person. Once trained, you can use this model to generate new images of the user in different settings, styles, or even historical periods.</p>
 
                     <h2>How does it work?</h2>
-                    <p>After you upload the selfies, our system trains a model based on the provided images. You can then use prompts to create images where the <strong>USER</strong> (representing the person in the selfies) appears in various imaginative or realistic scenarios.</p>
+                    <p>After you upload the selfies, our system trains a model based on the provided images. You can then use prompts to create images where the user (the person in the selfies) appears in various imaginative or realistic scenarios.</p>
 
                     <h2>Can one model be used for multiple people?</h2>
                     <p>No, each model is trained for one person only. If you want to generate images of multiple people, you will need to train a separate model for each person.</p>
@@ -38,8 +38,8 @@ function Help({ onClose }) {
                     <h2>What kind of images should I upload?</h2>
                     <p>To get the best results, upload clear, well-lit selfies that show the user's face from various angles. Consistency in lighting and backgrounds is helpful but not required. Please ensure the images are appropriate and align with our community guidelines.</p>
 
-                    <h2>How long does the training process take?</h2>
-                    <p>Training typically takes around 20 minutes, depending on server demand.</p>
+                    <h2>How long does it take?</h2>
+                    <p>Training a model takes around 20 minutes. Generating images takes around 10 seconds.</p>
 
                     <h2>What are some good prompts to use?</h2>
                     <p>After your model is trained, try these prompts:</p>
@@ -66,7 +66,10 @@ function Help({ onClose }) {
                     <p>Yes, all generated images are downloadable. Click on the image to see the full-size version. On a mobile phone, long-click on the image in order to save or share it. On a desktop computer, right-click or ctrl-click to save or share.</p>
 
                     <h2>Is there a limit to how many images I can generate?</h2>
-                    <p>Training models and generating images uses expensive GPU hardware and resources. We have put in place a credit system. We have two types of credits: <strong>model credits</strong> and <strong>image credits</strong>. Each time you train a model, it uses 1 model credit, and each image generation uses 1 image credit. When you sign up, you receive a certain number of free credits to get started. Once your credits run out, you will need to purchase more to continue training models or generating images.</p>
+                    <p>Training models and generating images uses expensive GPU hardware and resources. We have put in place a credit system. We have two types of credits: <strong>model credits</strong> and <strong>image credits</strong>. Each time you train a model, it uses 1 model credit, and each image generation uses 1 image credit. Once your credits run out, you will need to purchase more to continue training models or generating images.</p>
+                
+                    <h2>What if I have more questions?</h2>
+                    <p>Email us at <strong>support@greatshots.art</strong></p>
                 </Box>
 
                 {/* Right Column */}

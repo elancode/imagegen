@@ -26,6 +26,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import BuyCredits from './BuyCredits';
 import Help from './Help';
+import SplashPage from './SplashPage';
 
 function App() {
     const theme = useTheme();
@@ -50,7 +51,7 @@ function App() {
     const [trainingProgress, setTrainingProgress] = useState('');
     const [token, setToken] = useState(() => localStorage.getItem('token'));
     const [userEmail, setUserEmail] = useState(() => localStorage.getItem('userEmail'));
-    const [showAuth, setShowAuth] = useState(!localStorage.getItem('token'));
+    const [showAuth, setShowAuth] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [authError, setAuthError] = useState('');
     const [authEmail, setAuthEmail] = useState('');
@@ -500,9 +501,7 @@ function App() {
     };
 
     const handleHelp = () => {
-        console.log('Help clicked');
         setShowHelp(true);
-        handleMenuClose();
     };
 
     const handleCloseHelp = () => {
@@ -528,51 +527,56 @@ function App() {
                             style={{ maxWidth: '150px', height: 'auto' }}
                         />
                     </Box>
-                    {/* Conditionally render the account menu */}
-                    {!(showHelp || showBuyCredits) && (
-                        <>
-                            <IconButton
-                                edge="end"
-                                color="inherit"
-                                onClick={handleAccountClick}
-                            >
-                                <AccountCircle sx={{ fontSize: '2.5rem' }} />
-                            </IconButton>
-                            <Menu
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={handleMenuClose}
-                            >
-                                <MenuItem disabled>{userEmail}</MenuItem>
-                                <Divider />
-                                <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>
-                                    Model Credits: {modelTrainingCredits}
-                                </MenuItem>
-                                <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>
-                                    Image Credits: {imageGenerationCredits}
-                                </MenuItem>
-                                <Divider />
-                                <MenuItem onClick={handleBuyCredits} sx={{ padding: '4px 16px', minHeight: '32px' }}>
-                                    Buy Credits
-                                </MenuItem>
-                                <MenuItem onClick={handleHelp} sx={{ padding: '4px 16px', minHeight: '32px' }}>
-                                    Help
-                                </MenuItem>
-                                <MenuItem onClick={handleLogout} sx={{ padding: '4px 16px', minHeight: '32px' }}>
-                                    Logout
-                                </MenuItem>
-                            </Menu>
-                        </>
-                    )}
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {/* Help button accessible to all users */}
+                        <Button
+                            variant="text"
+                            color="inherit"
+                            onClick={handleHelp}
+                        >
+                            Help
+                        </Button>
+                        {token && (
+                            <>
+                                <IconButton
+                                    edge="end"
+                                    color="inherit"
+                                    onClick={handleAccountClick}
+                                >
+                                    <AccountCircle sx={{ fontSize: '2.5rem' }} />
+                                </IconButton>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleMenuClose}
+                                >
+                                    <MenuItem disabled>{userEmail}</MenuItem>
+                                    <Divider />
+                                    <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px'  }}>
+                                        Model Credits: {modelTrainingCredits}
+                                    </MenuItem>
+                                    <MenuItem disabled sx={{ padding: '4px 16px', minHeight: '32px' }}>
+                                        Image Credits: {imageGenerationCredits}
+                                    </MenuItem>
+                                    <Divider />
+                                    <MenuItem onClick={handleBuyCredits} sx={{ padding: '4px 16px', minHeight: '32px' }}>
+                                        Buy Credits
+                                    </MenuItem>
+                                    <MenuItem onClick={handleLogout} sx={{ padding: '4px 16px', minHeight: '32px' }}>
+                                        Logout
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                        )}
+                    </Box>
                 </Box>
             </Box>
 
-            {/* Conditionally Render Help or BuyCredits Components */}
             {showHelp ? (
                 <Help onClose={handleCloseHelp} />
             ) : showBuyCredits ? (
                 <BuyCredits onClose={handleCloseBuyCredits} />
-            ) : (
+            ) : token ? (
                 <>
                     {/* Main App Content */}
                     {token && (
@@ -775,12 +779,25 @@ function App() {
                             </Dialog>
                         </>
                     )}
+                </>
+            ) : (
+                <>
+                    {/* Show SplashPage when user is not logged in */}
+                    <SplashPage
+                        onLoginClick={() => { setIsLogin(true); setShowAuth(true); }}
+                        onTryNowClick={() => { setIsLogin(false); setShowAuth(true); }}
+                    />
 
                     {/* Auth Dialog */}
                     {showAuth && (
-                        <Dialog open={showAuth} maxWidth="xs" fullWidth>
+                        <Dialog
+                            open={showAuth}
+                            onClose={() => setShowAuth(false)}
+                            maxWidth="xs"
+                            fullWidth
+                        >
                             <DialogTitle>
-                                {isLogin ? 'Login' : 'Register'}
+                                {isLogin ? 'Login' : 'Sign Up'}
                             </DialogTitle>
                             <form onSubmit={handleAuth}>
                                 <DialogContent>
@@ -817,20 +834,20 @@ function App() {
                                     />
                                     {!isLogin && (
                                         <Typography variant="body2" sx={{ mt: 2 }}>
-                                            By registering, you agree to our <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>.
+                                            By signing up, you agree to our <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>.
                                         </Typography>
                                     )}
                                 </DialogContent>
                                 <DialogActions sx={{ px: 3, pb: 2 }}>
                                     <Button onClick={() => setIsLogin(!isLogin)}>
-                                        {isLogin ? 'Need an account? Register' : 'Have an account? Login'}
+                                        {isLogin ? 'Need an account? Sign Up' : 'Have an account? Login'}
                                     </Button>
                                     <Button type="submit" variant="contained">
-                                        {isLogin ? 'Login' : 'Register'}
+                                        {isLogin ? 'Login' : 'Sign Up'}
                                     </Button>
                                 </DialogActions>
                             </form>
-                    </Dialog>
+                        </Dialog>
                     )}
                 </>
             )}
