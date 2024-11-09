@@ -225,7 +225,14 @@ function App() {
             if (!response.ok) {
                 const errorData = await response.json();
                 if (errorData.error === 'No model training credits available') {
-                    setTrainingCreditError('You have used all of your model training credits');
+                    setTrainingCreditError(
+                        <>
+                            You do not have any model training credits.{' '}
+                            <a href="#" onClick={handleBuyCredits} style={{ color: '#1976d2', textDecoration: 'underline' }}>
+                                Buy Credits
+                            </a>
+                        </>
+                    );
                 } else {
                     throw new Error(errorData.error || 'Training failed to start');
                 }
@@ -312,7 +319,14 @@ function App() {
             if (!response.ok) {
                 const errorData = await response.json();
                 if (errorData.error === 'No image generation credits available') {
-                    setCreditError('You have used all of your image generation credits');
+                    setCreditError(
+                        <>
+                            You do not have any image generation credits.{' '}
+                            <a href="#" onClick={handleBuyCredits} style={{ color: '#1976d2', textDecoration: 'underline' }}>
+                                Buy Credits
+                            </a>
+                        </>
+                    );
                 } else {
                     throw new Error(errorData.error || 'Generation failed');
                 }
